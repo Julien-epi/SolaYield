@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 pub struct UserPosition {
     pub user: Pubkey,
     pub amount: u64,
-    pub maturity_ts: i64,
+    pub deposit_time: i64,
 }
 
 impl UserPosition {
