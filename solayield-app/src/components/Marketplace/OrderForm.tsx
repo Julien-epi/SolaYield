@@ -69,31 +69,31 @@ const OrderForm: FC<OrderFormProps> = ({ token, type, onClose }) => {
   }
 
   return (
-    <div className="modal p-6 rounded-lg shadow-lg">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
-          {type === 'buy' ? 'Buy' : 'Sell'} {token.symbol}
+    <div className="modal p-8 rounded-lg shadow-2xl bg-gray-900 text-gray-100 max-w-xl mx-auto min-h-[380px] flex flex-col justify-center">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-100">
+          {type === 'buy' ? 'Acheter' : 'Vendre'} {token.symbol}
         </h2>
         <button
           onClick={onClose}
-          className="text-gray-500 hover:text-gray-700"
+          className="text-gray-400 hover:text-white text-2xl focus:outline-none"
         >
-          <XMarkIcon className="h-6 w-6" />
+          <XMarkIcon className="h-7 w-7" />
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8 flex-1 flex flex-col justify-center">
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-            Amount
+          <label htmlFor="amount" className="block text-base font-medium text-gray-200 mb-2">
+            Montant
           </label>
           <input
             type="number"
             id="amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500"
-            placeholder="Enter amount"
+            className="w-full rounded-lg border border-gray-700 bg-gray-800 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg px-5 py-4"
+            placeholder="0.00"
             min="0"
             step="0.01"
             required
@@ -101,39 +101,31 @@ const OrderForm: FC<OrderFormProps> = ({ token, type, onClose }) => {
         </div>
 
         <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Unit Price</span>
-            <span className="text-gray-900">${token.price.toFixed(2)}</span>
+          <div className="flex justify-between text-base">
+            <span className="text-gray-400">Prix unitaire</span>
+            <span className="text-gray-100">${token.price.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Total Price</span>
-            <span className="text-gray-900">
+          <div className="flex justify-between text-base">
+            <span className="text-gray-400">Prix total</span>
+            <span className="text-gray-100">
               ${(Number(amount) * token.price).toFixed(2)}
             </span>
           </div>
         </div>
 
-        <div className="flex space-x-4">
+        <div className="flex gap-4 mt-4">
+          <button
+            type="submit"
+            className="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-lg text-base font-medium hover:bg-indigo-700"
+          >
+            {type === 'buy' ? 'Acheter' : 'Vendre'}
+          </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+            className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-100 font-medium px-4 py-3 rounded-lg text-base"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <LoadingSpinner />
-                <span className="ml-2">Processing...</span>
-              </div>
-            ) : (
-              `${type === 'buy' ? 'Buy' : 'Sell'} ${token.symbol}`
-            )}
+            Annuler
           </button>
         </div>
       </form>

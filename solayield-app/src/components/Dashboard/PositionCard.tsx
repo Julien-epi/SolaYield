@@ -17,10 +17,10 @@ const PositionCard: FC<PositionCardProps> = ({ position }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
+    <div className="bg-gray-900 rounded-xl shadow-lg p-8 border-2 border-gray-700">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-100">
             {position.tokenSymbol}
           </h3>
           <p className="text-sm text-gray-500">
@@ -37,25 +37,23 @@ const PositionCard: FC<PositionCardProps> = ({ position }) => {
 
       <div className="space-y-3">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Yield gagné</span>
-          <span className="font-medium">
+          <span className="text-gray-400">Yield gagné</span>
+          <span className="font-medium text-gray-100">
             ${position.yieldEarned.toLocaleString()}
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Date de début</span>
-          <span className="font-medium">{formatDate(position.startDate)}</span>
+          <span className="text-gray-400">Date de début</span>
+          <span className="font-medium text-gray-100">{formatDate(position.startDate)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Date d'échéance</span>
-          <span className="font-medium">{formatDate(position.maturityDate)}</span>
+          <span className="text-gray-400">Date d'échéance</span>
+          <span className="font-medium text-gray-100">{formatDate(position.maturityDate)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Statut</span>
+          <span className="text-gray-400">Statut</span>
           <span
-            className={`font-medium ${
-              position.status === 'active' ? 'text-green-600' : 'text-gray-600'
-            }`}
+            className={`font-medium ${position.status === 'active' ? 'text-green-400' : 'text-gray-400'}`}
           >
             {position.status === 'active' ? 'Actif' : 'Maturé'}
           </span>

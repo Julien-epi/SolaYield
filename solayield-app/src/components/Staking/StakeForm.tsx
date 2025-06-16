@@ -65,9 +65,9 @@ const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8 min-h-[320px] flex flex-col justify-center">
       <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="amount" className="block text-base font-medium text-gray-200 mb-2">
           Montant à staker
         </label>
         <div className="mt-1">
@@ -77,32 +77,32 @@ const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
             id="amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full rounded-lg border border-gray-700 bg-gray-800 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg px-5 py-4"
             placeholder="0.00"
             step="0.01"
             min={pool.minStake}
             required
           />
         </div>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-gray-400">
           Montant minimum: {pool.minStake} {pool.token}
         </p>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-400">
           APY: {pool.apy}%
         </p>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-4 mt-4">
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50"
+          className="flex-1 bg-gray-800 text-gray-100 border border-gray-700 px-4 py-3 rounded-lg text-base font-medium hover:bg-gray-700"
         >
           Annuler
         </button>
         <button
           type="submit"
-          className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+          className="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-lg text-base font-medium hover:bg-indigo-700"
         >
           Staker
         </button>

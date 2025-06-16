@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
 import WalletButton from '@/components/Wallet/WalletButton';
-import ThemeToggle from '@/components/UI/ThemeToggle';
 
 const Navbar: FC = () => {
   const pathname = usePathname();
@@ -14,11 +13,11 @@ const Navbar: FC = () => {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="bg-white shadow-sm transition-colors">
+    <nav className="bg-gray-900 shadow-sm transition-colors">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-indigo-600">
+            <Link href="/" className="text-xl font-bold text-indigo-400">
               SolaYield
             </Link>
             <div className="hidden md:flex ml-10 space-x-8">
@@ -26,8 +25,8 @@ const Navbar: FC = () => {
                 href="/staking"
                 className={`${
                   isActive('/staking')
-                    ? 'text-indigo-600'
-                    : 'text-gray-500 hover:text-gray-900'
+                    ? 'text-indigo-400'
+                    : 'text-gray-300 hover:text-white'
                 } px-3 py-2 text-sm font-medium transition-colors`}
               >
                 Staking
@@ -36,8 +35,8 @@ const Navbar: FC = () => {
                 href="/marketplace"
                 className={`${
                   isActive('/marketplace')
-                    ? 'text-indigo-600'
-                    : 'text-gray-500 hover:text-gray-900'
+                    ? 'text-indigo-400'
+                    : 'text-gray-300 hover:text-white'
                 } px-3 py-2 text-sm font-medium transition-colors`}
               >
                 Marketplace
@@ -47,8 +46,8 @@ const Navbar: FC = () => {
                   href="/dashboard"
                   className={`${
                     isActive('/dashboard')
-                      ? 'text-indigo-600'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'text-indigo-400'
+                      : 'text-gray-300 hover:text-white'
                   } px-3 py-2 text-sm font-medium transition-colors`}
                 >
                   Dashboard

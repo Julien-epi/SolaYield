@@ -45,37 +45,37 @@ const StakingPage: FC = () => {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Staking & Lending</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-100">Staking & Lending</h1>
+        <p className="mt-2 text-gray-400">
           Déposez vos actifs et commencez à générer des rendements
         </p>
       </div>
 
       {!connected ? (
-        <div className="text-center p-8 bg-white rounded-lg shadow-sm">
-          <p className="text-gray-600">Connectez votre wallet pour commencer le staking</p>
+        <div className="text-center p-8 bg-gray-900 rounded-lg shadow-sm">
+          <p className="text-gray-400">Connectez votre wallet pour commencer le staking</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {pools.map((pool) => (
-            <div key={pool.id} className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">{pool.name}</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">APY</span>
-                  <span className="font-medium">{pool.apy}%</span>
+            <div key={pool.id} className="bg-gray-900 p-8 rounded-xl shadow-lg border-2 border-gray-700">
+              <h2 className="text-2xl font-semibold text-gray-100 mb-6">{pool.name}</h2>
+              <div className="space-y-6">
+                <div className="flex justify-between text-base">
+                  <span className="text-gray-400">APY</span>
+                  <span className="font-medium text-gray-100">{pool.apy}%</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Total Value Locked</span>
-                  <span className="font-medium">${pool.tvl.toLocaleString()}</span>
+                <div className="flex justify-between text-base">
+                  <span className="text-gray-400">Total Value Locked</span>
+                  <span className="font-medium text-gray-100">${pool.tvl.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Minimum Stake</span>
-                  <span className="font-medium">{pool.minStake} {pool.token}</span>
+                <div className="flex justify-between text-base">
+                  <span className="text-gray-400">Minimum Stake</span>
+                  <span className="font-medium text-gray-100">{pool.minStake} {pool.token}</span>
                 </div>
                 <button 
                   onClick={() => handleStakeClick(pool)}
-                  className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+                  className="w-full bg-indigo-600 text-white px-6 py-3 rounded-md text-base font-semibold hover:bg-indigo-700"
                 >
                   Stake {pool.token}
                 </button>

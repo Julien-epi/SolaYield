@@ -80,7 +80,8 @@ const MarketplacePage: FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={selectedToken ? `${orderType === 'buy' ? 'Acheter' : 'Vendre'} ${selectedToken.symbol}` : ''}
+        title={''}
+        showCloseButton={false}
       >
         {selectedToken && (
           <OrderForm
