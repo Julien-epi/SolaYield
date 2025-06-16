@@ -1,7 +1,10 @@
 'use client';
 
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { YieldToken } from '@/services/marketplace';
+import Modal from '@/components/UI/Modal';
+import LoadingSpinner from '@/components/UI/LoadingSpinner';
+import { useToast } from '@/contexts/ToastContext';
 
 interface YieldTokenCardProps {
   token: YieldToken;
@@ -16,6 +19,24 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
+  const isMatured = new Date(token.maturityDate) <= new Date();
+
+  const handleRedeem = async () => {
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // simulation
+      toast.showToast('Succès', 'Rachat effectué avec succès !', 'success');
+      setIsModalOpen(false);
+    } catch (e) {
+      toast.showToast('Erreur', "Le rachat a échoué.", 'error');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,6 +84,42 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
         >
           Sell
         </button>
+        {isMatured && (
+          <>
+            <button
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              onClick={() => setIsModalOpen(true)}
+              disabled={isLoading}
+            >
+              Racheter (Redeem)
+            </button>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Confirmation" showCloseButton>
+              <div className="space-y-6">
+                <p>Êtes-vous sûr de vouloir racheter ce Yield Token ?</p>
+                {isLoading ? (
+                  <LoadingSpinner size="md" color="primary" />
+                ) : (
+                  <div className="flex justify-end gap-4">
+                    <button
+                      className="px-4 py-2 rounded bg-gray-700 text-gray-200 hover:bg-gray-600"
+                      onClick={() => setIsModalOpen(false)}
+                      disabled={isLoading}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                      onClick={handleRedeem}
+                      disabled={isLoading}
+                    >
+                      Confirmer
+                    </button>
+                  </div>
+                )}
+              </div>
+            </Modal>
+          </>
+        )}
       </div>
     </div>
   );

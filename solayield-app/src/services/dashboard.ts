@@ -45,8 +45,8 @@ const mockPositions: Position[] = [
     apy: 12,
     yieldEarned: 800,
     startDate: new Date('2024-01-01'),
-    maturityDate: new Date('2024-12-31'),
-    status: 'active'
+    maturityDate: new Date('2023-12-31'),
+    status: 'matured'
   },
   {
     id: '2',
