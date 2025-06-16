@@ -19,34 +19,34 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
   };
 
   return (
-    <div className="card rounded-lg shadow-lg p-6 transition-all duration-200 hover:shadow-xl">
+    <div className="card rounded-xl shadow-lg p-8 bg-gray-900 border-2 border-gray-700">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-xl font-bold text-gray-900">{token.name}</h3>
-          <p className="text-sm text-gray-500">{token.symbol}</p>
+          <h3 className="text-xl font-bold text-gray-100">{token.name}</h3>
+          <p className="text-sm text-gray-400">{token.symbol}</p>
         </div>
         <div className="text-right">
-          <p className="text-lg font-semibold text-gray-900">${token.price.toFixed(2)}</p>
-          <p className="text-sm text-green-600">{token.apy}% APY</p>
+          <p className="text-lg font-semibold text-gray-100">${token.price.toFixed(2)}</p>
+          <p className="text-sm text-indigo-400">{token.apy}% APY</p>
         </div>
       </div>
 
       <div className="space-y-3 mb-6">
         <div className="flex justify-between">
-          <span className="text-gray-600">Total Supply</span>
-          <span className="text-gray-900">{token.totalSupply.toLocaleString()}</span>
+          <span className="text-gray-400">Total Supply</span>
+          <span className="text-gray-100">{token.totalSupply.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Available Supply</span>
-          <span className="text-gray-900">{token.availableSupply.toLocaleString()}</span>
+          <span className="text-gray-400">Available Supply</span>
+          <span className="text-gray-100">{token.availableSupply.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Maturity Date</span>
-          <span className="text-gray-900">{formatDate(token.maturityDate)}</span>
+          <span className="text-gray-400">Maturity Date</span>
+          <span className="text-gray-100">{formatDate(token.maturityDate)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Issuer</span>
-          <span className="text-gray-900">{token.issuer}</span>
+          <span className="text-gray-400">Issuer</span>
+          <span className="text-gray-100">{token.issuer}</span>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
         </button>
         <button
           onClick={() => onSell(token)}
-          className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+          className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-100 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
         >
           Sell
         </button>

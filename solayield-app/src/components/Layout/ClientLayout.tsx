@@ -25,7 +25,7 @@ const ClientLayout: FC<ClientLayoutProps> = ({ children }) => {
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
           <ToastProvider>
-            <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900 transition-colors">
+            <div className="min-h-screen flex flex-col bg-gray-900 text-gray-100 transition-colors">
               <Navbar />
               <main className="flex-1 container mx-auto px-4 py-8">
                 {children}
