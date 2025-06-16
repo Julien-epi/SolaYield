@@ -96,7 +96,7 @@ const DashboardPage: FC = () => {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Positions Actives</h2>
+        <h2 className="text-xl font-semibold text-gray-100 mb-4">Positions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {positions.map((position) => (
             <PositionCard key={position.id} position={position} />
