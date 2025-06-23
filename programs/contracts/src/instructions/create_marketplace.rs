@@ -53,7 +53,7 @@ pub struct CreateMarketplace<'info> {
 
 pub fn handle_create_marketplace(
     ctx: Context<CreateMarketplace>,
-    strategy_id: u64,
+    _strategy_id: u64,
     marketplace_id: u64,
     trading_fee_bps: u16,
 ) -> Result<()> {
