@@ -1,0 +1,42 @@
+# SolaYield Protocol - Devnet Deployment Configuration
+# ====================================================
+
+## Program Information
+PROGRAM_ID=BCz6K4XSaycH954PhZPPmwuistSyJP5p5Biya7frA2Az
+IDL_ACCOUNT=44bqEgBSCGh3fkA4vNMTU3eQM7tWX51nQXFrCKoZjxhi
+UPGRADE_AUTHORITY=GxZaCcFhtDyvMfQ15zRbsT1jHEZsM4GUcAxbkuy19oat
+
+## Deployment Details
+DEPLOY_SIGNATURE=5TfJunHX7G5oSSsPHzsu7SwgVMkuZDm95aKQaypUqgFTJtQCAUHrMmDs6FQZDTQUQ14Wt2L2XgVi7NELyYiANUm7
+DEPLOY_SLOT=389593521
+PROGRAM_SIZE=595320 bytes (581 KB)
+
+## Network Configuration
+SOLANA_CLUSTER=devnet
+RPC_URL=https://api.devnet.solana.com
+COMMITMENT=confirmed
+
+## Explorer Links
+Program: https://explorer.solana.com/address/BCz6K4XSaycH954PhZPPmwuistSyJP5p5Biya7frA2Az?cluster=devnet
+IDL: https://explorer.solana.com/address/44bqEgBSCGh3fkA4vNMTU3eQM7tWX51nQXFrCKoZjxhi?cluster=devnet
+
+## Available Instructions (10 total)
+### Protocol Core (6)
+- initialize_protocol()
+- create_strategy() 
+- deposit_to_strategy()
+- claim_yield()
+- withdraw_from_strategy()
+- redeem_yield_tokens()
+
+### Marketplace (4)
+- create_marketplace()
+- place_order()
+- execute_trade()
+- cancel_order()
+
+## Frontend Integration Example
+```typescript
+const programId = new PublicKey("BCz6K4XSaycH954PhZPPmwuistSyJP5p5Biya7frA2Az");
+const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+``` 
