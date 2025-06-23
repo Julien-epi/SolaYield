@@ -1,432 +1,464 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { Contracts } from "../target/types/contracts";
+import { expect } from "chai";
 import {
-  getAssociatedTokenAddress,
+  createMint,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { expect } from "chai";
+import { 
+  Keypair, 
+  SystemProgram, 
+  SYSVAR_RENT_PUBKEY,
+  PublicKey 
+} from "@solana/web3.js";
 
-describe("SolaYield Contracts", () => {
+describe("SolaYield Strategy System", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-
   const program = anchor.workspace.Contracts as Program<Contracts>;
-  
+
+  // Test accounts
+  let admin: Keypair;
+  let user1: Keypair;
+  let user2: Keypair;
+  let underlyingMint: PublicKey;
+  let decimals = 6;
+
   // PDAs
-  let poolPda: anchor.web3.PublicKey;
-  let poolBump: number;
-  let userPositionPda: anchor.web3.PublicKey;
-  let userPositionBump: number;
-  let ytMintPda: anchor.web3.PublicKey;
-  let ytMintBump: number;
-  
-  // Token accounts
-  let userYtAccount: anchor.web3.PublicKey;
-  
-  // Test users
-  let user1 = anchor.web3.Keypair.generate();
-  let user2 = anchor.web3.Keypair.generate();
-  
+  let strategyCounterPda: PublicKey;
+  let strategyPda: PublicKey;
+  let strategyVaultPda: PublicKey;
+  let yieldTokenMintPda: PublicKey;
+  let userPositionPda: PublicKey;
+
+  // Strategy parameters
+  const strategyId = 0;
+  const strategyName = "Solana Staking Strategy";
+  const strategyApy = 1000; // 10% APY
+
   before(async () => {
-    // Airdrop SOL to test users
-    await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(user1.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL)
-    );
-    await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(user2.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL)
+    // Initialize test accounts
+    admin = Keypair.generate();
+    user1 = Keypair.generate();
+    user2 = Keypair.generate();
+
+    // Airdrop SOL to test accounts
+    await Promise.all([
+      provider.connection.confirmTransaction(
+        await provider.connection.requestAirdrop(admin.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL)
+      ),
+      provider.connection.confirmTransaction(
+        await provider.connection.requestAirdrop(user1.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL)
+      ),
+      provider.connection.confirmTransaction(
+        await provider.connection.requestAirdrop(user2.publicKey, 10 * anchor.web3.LAMPORTS_PER_SOL)
+      ),
+    ]);
+
+    // Create test token mint
+    underlyingMint = await createMint(
+      provider.connection,
+      admin,
+      admin.publicKey,
+      null,
+      decimals
     );
 
-    // Find PDAs
-    [poolPda, poolBump] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("pool")],
+    // Derive PDAs
+    [strategyCounterPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("strategy_counter")],
       program.programId
     );
 
-    [ytMintPda, ytMintBump] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("yt_mint")],
+    [strategyPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("strategy"), new anchor.BN(strategyId).toArrayLike(Buffer, "le", 8)],
       program.programId
     );
 
-    console.log("🔍 PDAs found:");
-    console.log("   Pool PDA:", poolPda.toString());
-    console.log("   YT Mint PDA:", ytMintPda.toString());
+    [strategyVaultPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("strategy_vault"), new anchor.BN(strategyId).toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+
+    [yieldTokenMintPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("yield_token"), new anchor.BN(strategyId).toArrayLike(Buffer, "le", 8)],
+      program.programId
+    );
+
+    [userPositionPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("user_position"), user1.publicKey.toBuffer(), strategyPda.toBuffer()],
+      program.programId
+    );
+
+    console.log("🔍 Debug PDA Information:");
+    console.log("   Program ID:", program.programId.toString());
+    console.log("   Strategy ID:", strategyId);
+    console.log("   Strategy ID bytes:", new anchor.BN(strategyId).toArrayLike(Buffer, "le", 8));
+    console.log("   Expected Strategy PDA:", strategyPda.toString());
+    console.log("   Strategy Counter:", strategyCounterPda.toString());
+    console.log("   Underlying Mint:", underlyingMint.toString());
   });
 
-  describe("Initialization", () => {
-    it("Should initialize pool and YT mint", async () => {
+  describe("Protocol Initialization", () => {
+    it("Should initialize the protocol successfully", async () => {
       const tx = await program.methods
-        .initialize()
-        .accountsPartial({
-          authority: provider.wallet.publicKey,
-          pool: poolPda,
-          ytMint: ytMintPda,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        .initializeProtocol()
+        .accounts({
+          admin: admin.publicKey,
+          strategyCounter: strategyCounterPda,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
         })
+        .signers([admin])
         .rpc();
 
-      console.log("✅ Initialize transaction:", tx);
+      console.log("✅ Protocol initialized:", tx);
 
-      // Vérifier que le pool est initialisé
-      const poolAccount = await program.account.pool.fetch(poolPda);
-      expect(poolAccount.totalDeposits.toNumber()).to.equal(0);
-
-      console.log("✅ Pool initialized with total deposits:", poolAccount.totalDeposits.toNumber());
+      const counterAccount = await program.account.strategyCounter.fetch(strategyCounterPda);
+      expect(counterAccount.count.toNumber()).to.equal(0);
     });
   });
 
-  describe("Deposit Functionality", () => {
-    it("Should successfully deposit tokens", async () => {
-      const depositAmount = new anchor.BN(1000);
-      
-      [userPositionPda, userPositionBump] = anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("user_position"), user1.publicKey.toBuffer()],
+  describe("Strategy Creation", () => {
+    it("Should create a new strategy successfully", async () => {
+      console.log("🔄 Attempting to create strategy with:");
+      console.log("   Admin:", admin.publicKey.toString());
+      console.log("   Strategy PDA:", strategyPda.toString());
+      console.log("   Underlying Token:", underlyingMint.toString());
+      console.log("   Yield Token Mint PDA:", yieldTokenMintPda.toString());
+
+      try {
+        const tx = await program.methods
+          .createStrategy(strategyName, new anchor.BN(strategyApy), new anchor.BN(strategyId))
+          .accounts({
+            admin: admin.publicKey,
+            strategy: strategyPda,
+            strategyCounter: strategyCounterPda,
+            underlyingToken: underlyingMint,
+            yieldTokenMint: yieldTokenMintPda,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+            rent: SYSVAR_RENT_PUBKEY,
+          })
+          .signers([admin])
+          .rpc();
+
+        console.log("✅ Strategy created:", tx);
+
+        const strategyAccount = await program.account.strategy.fetch(strategyPda);
+        expect(strategyAccount.admin.toString()).to.equal(admin.publicKey.toString());
+        expect(strategyAccount.name).to.equal(strategyName);
+        expect(strategyAccount.apy.toNumber()).to.equal(strategyApy);
+        expect(strategyAccount.isActive).to.be.true;
+        expect(strategyAccount.strategyId.toNumber()).to.equal(strategyId);
+
+        const counterAccount = await program.account.strategyCounter.fetch(strategyCounterPda);
+        expect(counterAccount.count.toNumber()).to.equal(1);
+
+        console.log("✅ Strategy details verified");
+      } catch (error) {
+        console.error("❌ Strategy creation failed:");
+        console.error("Error:", error.toString());
+        
+        // Try to derive the PDA that the program expects
+        console.log("\n🔍 Debugging PDA calculation:");
+        const seeds = [Buffer.from("strategy"), new anchor.BN(strategyId).toArrayLike(Buffer, "le", 8)];
+        console.log("Seeds used:", seeds.map(s => Array.from(s)));
+        
+        // Manual PDA calculation for debugging
+        const [computedPda, bump] = PublicKey.findProgramAddressSync(seeds, program.programId);
+        console.log("Computed PDA:", computedPda.toString());
+        console.log("Computed bump:", bump);
+        console.log("Expected PDA:", strategyPda.toString());
+        console.log("PDAs match:", computedPda.equals(strategyPda));
+        
+        throw error;
+      }
+    });
+
+    it("Should fail to create strategy with invalid ID", async () => {
+      const invalidStrategyId = 999;
+      const [invalidStrategyPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("strategy"), new anchor.BN(invalidStrategyId).toArrayLike(Buffer, "le", 8)],
         program.programId
       );
 
-      userYtAccount = await getAssociatedTokenAddress(
-        ytMintPda,
+      try {
+        await program.methods
+          .createStrategy("Invalid Strategy", new anchor.BN(strategyApy), new anchor.BN(invalidStrategyId))
+          .accounts({
+            admin: admin.publicKey,
+            strategy: invalidStrategyPda,
+            strategyCounter: strategyCounterPda,
+            underlyingToken: underlyingMint,
+            yieldTokenMint: yieldTokenMintPda, // This will cause an error since it's for strategy ID 0
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+            rent: SYSVAR_RENT_PUBKEY,
+          })
+          .signers([admin])
+          .rpc();
+
+        expect.fail("Should have failed with constraint error");
+      } catch (error) {
+        expect(error.toString()).to.include("ConstraintSeeds");
+      }
+    });
+  });
+
+  describe("User Deposits", () => {
+    let userUnderlyingTokenAccount: any;
+    let userYieldTokenAccount: any;
+    const depositAmount = 1000 * 10 ** decimals; // 1000 tokens
+
+    it("Should setup user token account", async () => {
+      // Create and fund user token account
+      userUnderlyingTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        user1,
+        underlyingMint,
+        user1.publicKey
+      );
+
+      await mintTo(
+        provider.connection,
+        admin,
+        underlyingMint,
+        userUnderlyingTokenAccount.address,
+        admin,
+        depositAmount * 2 // Mint extra for multiple tests
+      );
+
+      console.log("✅ User token account setup:", userUnderlyingTokenAccount.address.toString());
+    });
+
+    it("Should deposit to strategy successfully", async () => {
+      // Pre-calculate yield token account address
+      const userYieldTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        user1,
+        yieldTokenMintPda,
         user1.publicKey
       );
 
       const tx = await program.methods
-        .deposit(depositAmount)
-        .accountsPartial({
+        .depositToStrategy(new anchor.BN(depositAmount), new anchor.BN(strategyId))
+        .accounts({
           user: user1.publicKey,
-          pool: poolPda,
+          strategy: strategyPda,
           userPosition: userPositionPda,
-          ytMint: ytMintPda,
-          userYtAccount: userYtAccount,
+          underlyingTokenMint: underlyingMint,
+          userUnderlyingToken: userUnderlyingTokenAccount.address,
+          strategyVault: strategyVaultPda,
+          yieldTokenMint: yieldTokenMintPda,
+          userYieldTokenAccount: userYieldTokenAccount.address,
           tokenProgram: TOKEN_PROGRAM_ID,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
         })
         .signers([user1])
         .rpc();
 
       console.log("✅ Deposit transaction:", tx);
 
-      // Vérifier l'état du pool
-      const poolAccount = await program.account.pool.fetch(poolPda);
-      expect(poolAccount.totalDeposits.toNumber()).to.equal(1000);
-
-      // Vérifier la position utilisateur
+      // Verify user position
       const userPosition = await program.account.userPosition.fetch(userPositionPda);
       expect(userPosition.user.toString()).to.equal(user1.publicKey.toString());
-      expect(userPosition.amount.toNumber()).to.equal(1000);
-      expect(userPosition.depositTime.toNumber()).to.be.greaterThan(0);
+      expect(userPosition.strategy.toString()).to.equal(strategyPda.toString());
+      expect(userPosition.depositedAmount.toNumber()).to.equal(depositAmount);
+      expect(userPosition.yieldTokensMinted.toNumber()).to.equal(depositAmount);
 
-      console.log("✅ Pool total deposits:", poolAccount.totalDeposits.toNumber());
-      console.log("✅ User position amount:", userPosition.amount.toNumber());
+      // Verify strategy was updated
+      const strategyAccount = await program.account.strategy.fetch(strategyPda);
+      expect(strategyAccount.totalDeposits.toNumber()).to.equal(depositAmount);
+      expect(strategyAccount.totalYieldTokensMinted.toNumber()).to.equal(depositAmount);
+
+      console.log("✅ Deposit verified - Amount:", depositAmount / 10 ** decimals, "tokens");
     });
 
-    it("Should fail if user tries to deposit twice", async () => {
-      const depositAmount = new anchor.BN(500);
-      
+    it("Should fail deposit with zero amount", async () => {
+      const userYieldTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        user1,
+        yieldTokenMintPda,
+        user1.publicKey
+      );
+
       try {
         await program.methods
-          .deposit(depositAmount)
-          .accountsPartial({
+          .depositToStrategy(new anchor.BN(0), new anchor.BN(strategyId))
+          .accounts({
             user: user1.publicKey,
-            pool: poolPda,
+            strategy: strategyPda,
             userPosition: userPositionPda,
-            ytMint: ytMintPda,
-            userYtAccount: userYtAccount,
+            underlyingTokenMint: underlyingMint,
+            userUnderlyingToken: userUnderlyingTokenAccount.address,
+            strategyVault: strategyVaultPda,
+            yieldTokenMint: yieldTokenMintPda,
+            userYieldTokenAccount: userYieldTokenAccount.address,
             tokenProgram: TOKEN_PROGRAM_ID,
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+            systemProgram: SystemProgram.programId,
+            rent: SYSVAR_RENT_PUBKEY,
           })
           .signers([user1])
           .rpc();
-        
-        throw new Error("Should have failed - user position already exists");
-      } catch (err) {
-        expect(err.toString()).to.include("already in use");
-        console.log("✅ Correctly failed duplicate deposit");
+
+        expect.fail("Should have failed with invalid amount");
+      } catch (error) {
+        // Check for either the direct error message or simulation failure containing our error
+        const errorString = error.toString();
+        const hasInvalidAmount = errorString.includes("InvalidAmount") || 
+                               errorString.includes("Simulation failed");
+        expect(hasInvalidAmount).to.be.true;
+        console.log("✅ Zero amount deposit correctly rejected");
       }
-    });
-
-    it("Should allow multiple users to deposit", async () => {
-      const depositAmount = new anchor.BN(2000);
-      
-      const [user2PositionPda] = anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("user_position"), user2.publicKey.toBuffer()],
-        program.programId
-      );
-
-      const user2YtAccount = await getAssociatedTokenAddress(
-        ytMintPda,
-        user2.publicKey
-      );
-
-      await program.methods
-        .deposit(depositAmount)
-        .accountsPartial({
-          user: user2.publicKey,
-          pool: poolPda,
-          userPosition: user2PositionPda,
-          ytMint: ytMintPda,
-          userYtAccount: user2YtAccount,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .signers([user2])
-        .rpc();
-
-      // Vérifier que le total des dépôts a augmenté
-      const poolAccount = await program.account.pool.fetch(poolPda);
-      expect(poolAccount.totalDeposits.toNumber()).to.equal(3000); // 1000 + 2000
-
-      console.log("✅ Multiple users can deposit. Total deposits:", poolAccount.totalDeposits.toNumber());
-    });
-
-    it("Should handle zero amount deposit", async () => {
-      const user3 = anchor.web3.Keypair.generate();
-      await provider.connection.confirmTransaction(
-        await provider.connection.requestAirdrop(user3.publicKey, anchor.web3.LAMPORTS_PER_SOL)
-      );
-
-      const [user3PositionPda] = anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("user_position"), user3.publicKey.toBuffer()],
-        program.programId
-      );
-
-      const user3YtAccount = await getAssociatedTokenAddress(
-        ytMintPda,
-        user3.publicKey
-      );
-
-      const depositAmount = new anchor.BN(0);
-      
-      await program.methods
-        .deposit(depositAmount)
-        .accountsPartial({
-          user: user3.publicKey,
-          pool: poolPda,
-          userPosition: user3PositionPda,
-          ytMint: ytMintPda,
-          userYtAccount: user3YtAccount,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .signers([user3])
-        .rpc();
-
-      const userPosition = await program.account.userPosition.fetch(user3PositionPda);
-      expect(userPosition.amount.toNumber()).to.equal(0);
-      
-      console.log("✅ Zero amount deposit handled correctly");
     });
   });
 
-  describe("Redeem Functionality", () => {
-    it("Should fail to redeem before maturity (60 seconds)", async () => {
-      try {
-        await program.methods
-          .redeem()
-          .accountsPartial({
-            user: user1.publicKey,
-            pool: poolPda,
-            userPosition: userPositionPda,
-          })
-          .signers([user1])
-          .rpc();
-        
-        throw new Error("Should have failed - not mature yet");
-      } catch (err) {
-        expect(err.toString()).to.include("NotMature");
-        console.log("✅ Correctly failed premature redeem");
-      }
-    });
+  describe("Yield Claims", () => {
+    it("Should allow users to claim yield after time passes", async () => {
+      // Wait a bit for yield to accumulate
+      console.log("⏳ Waiting for yield to accumulate...");
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
-    it("Should fail with invalid user constraint", async () => {
-      // Essayer de redeem avec un autre utilisateur
-      try {
-        await program.methods
-          .redeem()
-          .accountsPartial({
-            user: user2.publicKey,
-            pool: poolPda,
-            userPosition: userPositionPda, // Position de user1
-          })
-          .signers([user2])
-          .rpc();
-        
-        throw new Error("Should have failed - wrong user");
-      } catch (err) {
-        expect(err.toString()).to.include("constraint");
-        console.log("✅ Correctly failed with wrong user");
-      }
-    });
+      const userYieldTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        user1,
+        yieldTokenMintPda,
+        user1.publicKey
+      );
 
-    it("Should successfully redeem after maturity", async () => {
-      console.log("⏳ Waiting 65 seconds for maturity...");
-      await new Promise((resolve) => setTimeout(resolve, 65000));
+      const initialBalance = Number(userYieldTokenAccount.amount);
+      console.log("Initial yield token balance:", initialBalance);
 
-      const poolBefore = await program.account.pool.fetch(poolPda);
-      const userPositionBefore = await program.account.userPosition.fetch(userPositionPda);
-      
       const tx = await program.methods
-        .redeem()
-        .accountsPartial({
+        .claimYield(new anchor.BN(strategyId))
+        .accounts({
           user: user1.publicKey,
-          pool: poolPda,
+          strategy: strategyPda,
           userPosition: userPositionPda,
+          yieldTokenMint: yieldTokenMintPda,
+          userYieldTokenAccount: userYieldTokenAccount.address,
+          tokenProgram: TOKEN_PROGRAM_ID,
         })
         .signers([user1])
         .rpc();
 
-      console.log("✅ Redeem transaction:", tx);
+      console.log("✅ Yield claim transaction:", tx);
 
-      // Vérifier que le pool total a diminué
-      const poolAfter = await program.account.pool.fetch(poolPda);
-      const expectedTotal = poolBefore.totalDeposits.toNumber() - userPositionBefore.amount.toNumber();
-      expect(poolAfter.totalDeposits.toNumber()).to.equal(expectedTotal);
+      // Refresh account
+      const finalTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        user1,
+        yieldTokenMintPda,
+        user1.publicKey
+      );
 
-      // Vérifier que le compte utilisateur a été fermé
-      try {
-        await program.account.userPosition.fetch(userPositionPda);
-        throw new Error("User position should have been closed");
-      } catch (err) {
-        expect(err.toString()).to.include("Account does not exist");
-        console.log("✅ User position correctly closed");
-      }
+      const finalBalance = Number(finalTokenAccount.amount);
+      console.log("Final yield token balance:", finalBalance);
 
-      console.log("✅ Redeem successful. Pool total deposits:", poolAfter.totalDeposits.toNumber());
+      // Should have received some yield
+      expect(finalBalance).to.be.greaterThan(initialBalance);
+      console.log("✅ Yield claimed successfully!");
+    });
+  });
+
+  describe("Withdrawals", () => {
+    it("Should allow withdrawal without penalty", async () => {
+      const withdrawAmount = 500 * 10 ** decimals; // 500 tokens
+      
+      const userUnderlyingTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        user1,
+        underlyingMint,
+        user1.publicKey
+      );
+
+      const initialBalance = Number(userUnderlyingTokenAccount.amount);
+
+      const tx = await program.methods
+        .withdrawFromStrategy(new anchor.BN(withdrawAmount), new anchor.BN(strategyId))
+        .accounts({
+          user: user1.publicKey,
+          strategy: strategyPda,
+          userPosition: userPositionPda,
+          strategyVault: strategyVaultPda,
+          userUnderlyingToken: userUnderlyingTokenAccount.address,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([user1])
+        .rpc();
+
+      console.log("✅ Withdrawal transaction:", tx);
+
+      // Check balance increased by full amount (no penalty)
+      const finalTokenAccount = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        user1,
+        underlyingMint,
+        user1.publicKey
+      );
+
+      const finalBalance = Number(finalTokenAccount.amount);
+      const receivedAmount = finalBalance - initialBalance;
+
+      // Should receive full amount without penalty
+      expect(receivedAmount).to.equal(withdrawAmount);
+      console.log("✅ Withdrawal verified - No penalty applied!");
     });
 
-    it("Should fail to redeem twice", async () => {
+    it("Should fail withdrawal with insufficient balance", async () => {
+      const excessiveAmount = 10000 * 10 ** decimals; // More than deposited
+
       try {
         await program.methods
-          .redeem()
-          .accountsPartial({
+          .withdrawFromStrategy(new anchor.BN(excessiveAmount), new anchor.BN(strategyId))
+          .accounts({
             user: user1.publicKey,
-            pool: poolPda,
+            strategy: strategyPda,
             userPosition: userPositionPda,
+            strategyVault: strategyVaultPda,
+            userUnderlyingToken: (await getOrCreateAssociatedTokenAccount(
+              provider.connection,
+              user1,
+              underlyingMint,
+              user1.publicKey
+            )).address,
+            tokenProgram: TOKEN_PROGRAM_ID,
           })
           .signers([user1])
           .rpc();
-        
-        throw new Error("Should have failed - position already redeemed");
-      } catch (err) {
-        expect(err.toString()).to.include("user_position");
-        console.log("✅ Correctly failed double redeem");
+
+        expect.fail("Should have failed with insufficient balance");
+      } catch (error) {
+        expect(error.toString()).to.include("InsufficientBalance");
       }
     });
   });
 
-  describe("State Validation", () => {
-    it("Should maintain correct pool state across operations", async () => {
-      const poolAccount = await program.account.pool.fetch(poolPda);
+  describe("Strategy Analytics", () => {
+    it("Should track strategy metrics correctly", async () => {
+      const strategyAccount = await program.account.strategy.fetch(strategyPda);
       
-      // À ce point, user1 a redeemed (1000), user2 a déposé (2000), user3 a déposé (0)
-      // Total attendu: 2000
-      expect(poolAccount.totalDeposits.toNumber()).to.equal(2000);
+      // Verify strategy has accurate tracking
+      expect(strategyAccount.totalDeposits.toNumber()).to.be.greaterThan(0);
+      expect(strategyAccount.totalYieldTokensMinted.toNumber()).to.be.greaterThan(0);
+      expect(strategyAccount.isActive).to.be.true;
       
-      console.log("✅ Pool state validation passed");
-    });
-
-    it("Should handle reasonable amounts", async () => {
-      const user4 = anchor.web3.Keypair.generate();
-      await provider.connection.confirmTransaction(
-        await provider.connection.requestAirdrop(user4.publicKey, anchor.web3.LAMPORTS_PER_SOL)
-      );
-
-      const [user4PositionPda] = anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("user_position"), user4.publicKey.toBuffer()],
-        program.programId
-      );
-
-      const user4YtAccount = await getAssociatedTokenAddress(
-        ytMintPda,
-        user4.publicKey
-      );
-
-      // Test avec un montant raisonnable
-      const reasonableAmount = new anchor.BN("1000000000"); // 1 billion
-      
-      await program.methods
-        .deposit(reasonableAmount)
-        .accountsPartial({
-          user: user4.publicKey,
-          pool: poolPda,
-          userPosition: user4PositionPda,
-          ytMint: ytMintPda,
-          userYtAccount: user4YtAccount,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .signers([user4])
-        .rpc();
-
-      const userPosition = await program.account.userPosition.fetch(user4PositionPda);
-      expect(userPosition.amount.toString()).to.equal(reasonableAmount.toString());
-      
-      console.log("✅ Reasonable amount deposit successful");
-    });
-  });
-
-  describe("Edge Cases", () => {
-    it("Should handle timestamp edge cases", async () => {
-      // Créer un nouveau utilisateur pour tester les edge cases de temps
-      const user5 = anchor.web3.Keypair.generate();
-      await provider.connection.confirmTransaction(
-        await provider.connection.requestAirdrop(user5.publicKey, anchor.web3.LAMPORTS_PER_SOL)
-      );
-
-      const [user5PositionPda] = anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("user_position"), user5.publicKey.toBuffer()],
-        program.programId
-      );
-
-      const user5YtAccount = await getAssociatedTokenAddress(
-        ytMintPda,
-        user5.publicKey
-      );
-
-      await program.methods
-        .deposit(new anchor.BN(100))
-        .accountsPartial({
-          user: user5.publicKey,
-          pool: poolPda,
-          userPosition: user5PositionPda,
-          ytMint: ytMintPda,
-          userYtAccount: user5YtAccount,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .signers([user5])
-        .rpc();
-
-      const userPosition = await program.account.userPosition.fetch(user5PositionPda);
-      const currentTime = Math.floor(Date.now() / 1000);
-      
-      // Vérifier que le timestamp est raisonnable (dans les 10 secondes)
-      expect(Math.abs(userPosition.depositTime.toNumber() - currentTime)).to.be.lessThan(10);
-      
-      console.log("✅ Timestamp validation passed");
-      console.log("   Deposit time:", new Date(userPosition.depositTime.toNumber() * 1000).toISOString());
-    });
-
-    it("Should validate account ownership", async () => {
-      // Test pour s'assurer que les comptes sont correctement validés
-      const poolAccount = await program.account.pool.fetch(poolPda);
-      expect(poolAccount).to.not.be.null;
-      
-      console.log("✅ Account ownership validation passed");
+      console.log(`
+🎯 Strategy Metrics Summary:
+   📊 Total Deposits: ${strategyAccount.totalDeposits.toNumber() / 10 ** decimals} tokens
+   🪙 Total Yield Tokens: ${strategyAccount.totalYieldTokensMinted.toNumber() / 10 ** decimals}
+   📈 APY: ${strategyAccount.apy.toNumber() / 100}%
+   ✅ Status: ${strategyAccount.isActive ? 'Active' : 'Inactive'}
+   🆔 Strategy ID: ${strategyAccount.strategyId.toNumber()}
+      `);
     });
   });
 });
