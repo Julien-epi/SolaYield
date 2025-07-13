@@ -7,7 +7,7 @@
 
 **SolaYield** is a comprehensive DeFi protocol built on Solana that combines yield farming strategies with a secondary marketplace for trading yield-bearing tokens. Users can deposit assets into yield-generating strategies and trade their yield tokens for enhanced liquidity and flexibility.
 
-![SolaYield Homepage](./docs/images/homepage.png)
+![SolaYield Homepage](./docs/homepage.png)
 
 ## 🚀 Key Features
 
@@ -18,7 +18,7 @@
 - **Continuous Rewards**: Claim accumulated yield at any time
 - **Principal Protection**: Withdraw your original deposit whenever needed
 
-![Yield Farming Interface](./docs/images/staking-interface.png)
+![Yield Farming Interface](./docs/staking-interface.png)
 
 ### 🏪 Trading Marketplace
 - **Secondary Market**: Trade yield tokens with other users
@@ -26,7 +26,7 @@
 - **Instant Liquidity**: Execute trades immediately when orders match
 - **Price Discovery**: Real-time best bid/ask pricing
 
-![Trading Marketplace](./docs/images/marketplace-interface.png)
+![Trading Marketplace](./docs/marketplace-interface.png)
 
 ### 🔒 Security & Governance
 - **Admin Controls**: Strategy creation and marketplace management
@@ -83,7 +83,7 @@ graph TB
     style TradeOrder fill:#fff3e0
 ```
 
-![Contract Architecture](./docs/images/contract-architecture.png)
+![Contract Architecture](./docs/contract-architecture.png)
 
 ### Smart Contract Structure
 ```
@@ -207,7 +207,7 @@ yarn dev
 
 Visit `http://localhost:3000` to access the application.
 
-![Application HomePage](./docs/images/homepage.png)
+![Application HomePage](./docs/homepage.png)
 
 ## 📋 Usage
 
@@ -220,7 +220,7 @@ Visit `http://localhost:3000` to access the application.
 5. **Claim Rewards**: Collect accumulated yield periodically
 6. **Withdraw Principal**: Remove your original deposit at any time
 
-![User Dashboard](./docs/images/user-dashboard.png)
+![User Dashboard](./docs/user-dashboard.png)
 
 ### For Traders
 
@@ -230,7 +230,7 @@ Visit `http://localhost:3000` to access the application.
 4. **Execute Trades**: Trade with existing orders instantly
 5. **Manage Positions**: Monitor your yield token portfolio
 
-![Marketplace](./docs/images/marketplace-interface.png)
+![Marketplace](./docs/marketplace-interface.png)
 
 ### For Administrators
 
