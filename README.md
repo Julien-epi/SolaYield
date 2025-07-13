@@ -40,49 +40,6 @@
 
 The SolaYield protocol follows a clear separation between **data storage** (`state/`) and **business logic** (`instructions/`), providing a robust and maintainable architecture.
 
-```mermaid
-graph TB
-    subgraph "📦 SMART CONTRACT ARCHITECTURE"
-        subgraph "🗄️ STATE (Data Storage)"
-            Strategy["🎯 Strategy<br/>• admin: Pubkey<br/>• underlying_token: Pubkey<br/>• yield_token_mint: Pubkey<br/>• name: String<br/>• apy: u64<br/>• total_deposits: u64<br/>• is_active: bool"]
-            
-            UserPosition["👤 UserPosition<br/>• user: Pubkey<br/>• strategy: Pubkey<br/>• deposited_amount: u64<br/>• yield_tokens_minted: u64<br/>• deposit_time: i64<br/>• last_yield_claim: i64"]
-            
-            Marketplace["🏪 Marketplace<br/>• admin: Pubkey<br/>• strategy: Pubkey<br/>• yield_token_mint: Pubkey<br/>• best_bid_price: u64<br/>• best_ask_price: u64<br/>• trading_fee_bps: u16"]
-            
-            TradeOrder["📋 TradeOrder<br/>• user: Pubkey<br/>• marketplace: Pubkey<br/>• order_type: u8<br/>• yield_token_amount: u64<br/>• price_per_token: u64<br/>• is_active: bool"]
-        end
-        
-        subgraph "⚙️ INSTRUCTIONS (Business Logic)"
-            CreateStrategy["create_strategy()<br/>📝 Create new yield strategy"]
-            DepositToStrategy["deposit_to_strategy()<br/>💰 Deposit tokens & mint yield tokens"]
-            ClaimYield["claim_yield()<br/>🎁 Claim accumulated rewards"]
-            WithdrawFromStrategy["withdraw_from_strategy()<br/>🏦 Withdraw principal amount"]
-            
-            CreateMarketplace["create_marketplace()<br/>🏪 Setup trading marketplace"]
-            PlaceOrder["place_order()<br/>📋 Place buy/sell orders"]
-            ExecuteTrade["execute_trade()<br/>🔄 Execute matching orders"]
-            CancelOrder["cancel_order()<br/>❌ Cancel existing orders"]
-        end
-    end
-    
-    %% Data Creation/Updates
-    CreateStrategy -.->|"Creates"| Strategy
-    DepositToStrategy -.->|"Creates/Updates"| UserPosition
-    CreateMarketplace -.->|"Creates"| Marketplace
-    PlaceOrder -.->|"Creates"| TradeOrder
-    
-    %% Relationships
-    UserPosition -.->|"belongs to"| Strategy
-    Marketplace -.->|"trades tokens from"| Strategy
-    TradeOrder -.->|"placed in"| Marketplace
-    
-    style Strategy fill:#e1f5fe
-    style UserPosition fill:#f3e5f5
-    style Marketplace fill:#e8f5e8
-    style TradeOrder fill:#fff3e0
-```
-
 ![Contract Architecture](./docs/contract-architecture.png)
 
 ### Smart Contract Structure
