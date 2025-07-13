@@ -281,20 +281,6 @@ anchor deploy --provider.cluster mainnet-beta
 - `yarn solayield` - Run the full SolaYield demo
 - `yarn init` - Initialize the protocol
 
-## 🤝 Contributing
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Commit changes**: `git commit -m 'Add amazing feature'`
-4. **Push to branch**: `git push origin feature/amazing-feature`
-5. **Open a Pull Request**
-
-### Development Guidelines
-- Follow Rust and TypeScript best practices
-- Add tests for new features
-- Update documentation as needed
-- Ensure all tests pass before submitting
-
 ## 📄 License
 
 This project is licensed under the ISC License. See the [LICENSE](LICENSE) file for details.
@@ -318,17 +304,3 @@ docs/
 - **Program ID**: `BCz6K4XSaycH954PhZPPmwuistSyJP5p5Biya7frA2Az`
 - **Solana Explorer**: [View on Solana Explorer](https://explorer.solana.com/address/BCz6K4XSaycH954PhZPPmwuistSyJP5p5Biya7frA2Az?cluster=devnet)
 - **Documentation**: [Full Documentation](./docs/)
-
-## 🆘 Support
-
-If you encounter any issues or have questions:
-
-1. Check the [Issues](https://github.com/your-username/solayield/issues) page
-2. Create a new issue with detailed information
-3. Join our community discussions
-
----
-
-**Built with ❤️ on Solana**
-
-*SolaYield - Empowering DeFi with yield farming and trading innovation* 
