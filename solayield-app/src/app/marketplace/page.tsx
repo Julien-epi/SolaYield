@@ -9,12 +9,29 @@ import { marketplaceService, YieldToken } from '@/services/marketplace';
 import LoadingSpinner from '@/components/UI/LoadingSpinner';
 
 const MarketplacePage: FC = () => {
-  const { connected } = useWallet();
+  const { connected, wallet } = useWallet();
   const [tokens, setTokens] = useState<YieldToken[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState<YieldToken | null>(null);
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy');
+  const [isProgramInitialized, setIsProgramInitialized] = useState(false);
+
+  // Initialiser le programme quand le wallet est connecté
+  useEffect(() => {
+    const initializeProgram = async () => {
+      if (connected && wallet && !isProgramInitialized) {
+        try {
+          await marketplaceService.initializeProgram(wallet.adapter);
+          setIsProgramInitialized(true);
+        } catch (error) {
+          console.warn('Could not initialize program:', error);
+        }
+      }
+    };
+
+    initializeProgram();
+  }, [connected, wallet, isProgramInitialized]);
 
   useEffect(() => {
     const loadTokens = async () => {
@@ -29,7 +46,7 @@ const MarketplacePage: FC = () => {
     };
 
     loadTokens();
-  }, []);
+  }, [isProgramInitialized]);
 
   const handleBuy = (token: YieldToken) => {
     setSelectedToken(token);
@@ -54,15 +71,19 @@ const MarketplacePage: FC = () => {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-white-900">Marketplace</h1>
-        <p className="mt-2 text-white-600">
+        <h1 className="text-3xl font-bold text-white">Marketplace</h1>
+        <p className="mt-2 text-white">
           Achetez et vendez des tokens de yield sur le marché secondaire
         </p>
       </div>
 
       {!connected ? (
-        <div className="text-center p-8 bg-white rounded-lg shadow-sm">
-          <p className="text-gray-600">Connectez votre wallet pour accéder à la marketplace</p>
+        <div className="text-center p-8 shadow-sm">
+          <p className="text-gray-400">Connectez votre wallet pour accéder à la marketplace</p>
+        </div>
+      ) : tokens.length === 0 ? (
+        <div className="text-center p-8 shadow-sm">
+          <p className="text-gray-400">Aucun token de yield disponible pour le moment</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

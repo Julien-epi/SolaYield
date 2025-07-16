@@ -40,6 +40,8 @@ const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
 
     try {
       setIsProcessing(true);
+      console.log(pool.id, amountNum, publicKey);
+      
       const result = await stakingService.stake(pool.id, amountNum, publicKey);
 
       if (result.success) {

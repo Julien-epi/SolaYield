@@ -4,15 +4,33 @@ import { FC, useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Modal from '@/components/UI/Modal';
 import StakeForm from '@/components/Staking/StakeForm';
-import { stakingService, StakingPool } from '@/services/staking';
+import { stakingService } from '@/services/staking';
+import type { StakingPool } from '@/services/staking';
 import LoadingSpinner from '@/components/UI/LoadingSpinner';
 
 const StakingPage: FC = () => {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, wallet } = useWallet();
   const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
   const [selectedPool, setSelectedPool] = useState<StakingPool | null>(null);
   const [pools, setPools] = useState<StakingPool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProgramInitialized, setIsProgramInitialized] = useState(false);
+
+  // Initialiser le programme quand le wallet est connecté
+  useEffect(() => {
+    const initializeProgram = async () => {
+      if (connected && wallet && !isProgramInitialized) {
+        try {
+          await stakingService.initializeProgram(wallet.adapter);
+          setIsProgramInitialized(true);
+        } catch (error) {
+          console.warn('Could not initialize program:', error);
+        }
+      }
+    };
+
+    initializeProgram();
+  }, [connected, wallet, isProgramInitialized]);
 
   useEffect(() => {
     const loadPools = async () => {
@@ -27,7 +45,7 @@ const StakingPage: FC = () => {
     };
 
     loadPools();
-  }, []);
+  }, [isProgramInitialized]);
 
   const handleStakeClick = (pool: StakingPool) => {
     setSelectedPool(pool);
@@ -45,8 +63,8 @@ const StakingPage: FC = () => {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-100">Staking & Lending</h1>
-        <p className="mt-2 text-gray-400">
+        <h1 className="text-3xl font-bold text-white">Staking & Lending</h1>
+        <p className="mt-2 text-white">
           Déposez vos actifs et commencez à générer des rendements
         </p>
       </div>
@@ -54,6 +72,10 @@ const StakingPage: FC = () => {
       {!connected ? (
         <div className="text-center p-8 bg-gray-900 rounded-lg shadow-sm">
           <p className="text-gray-400">Connectez votre wallet pour commencer le staking</p>
+        </div>
+      ) : pools.length === 0 ? (
+        <div className="text-center p-8 bg-gray-900 rounded-lg shadow-sm">
+          <p className="text-gray-400">Aucun pool de staking disponible pour le moment</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

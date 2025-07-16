@@ -6,6 +6,7 @@ import { LockClosedIcon, CurrencyDollarIcon, ChartBarIcon, ClockIcon } from '@he
 import StatCard from '@/components/Dashboard/StatCard';
 import PositionCard from '@/components/Dashboard/PositionCard';
 import { dashboardService } from '@/services/dashboard';
+import { solaYieldProgram } from '@/services/program';
 import LoadingSpinner from '@/components/UI/LoadingSpinner';
 
 const DashboardPage: FC = () => {
@@ -22,6 +23,13 @@ const DashboardPage: FC = () => {
 
       try {
         setIsLoading(true);
+        
+        // Initialiser le programme avec le wallet
+        const wallet = window.solana;
+        if (wallet) {
+          await solaYieldProgram.initializeProgram(wallet);
+        }
+
         const [statsData, positionsData, tokensData, transactionsData] = await Promise.all([
           dashboardService.getStats(publicKey),
           dashboardService.getPositions(publicKey),
@@ -64,8 +72,8 @@ const DashboardPage: FC = () => {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-100">Dashboard</h1>
-        <p className="mt-2 text-gray-400">
+        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+        <p className="mt-2 text-white">
           Gérez vos positions et suivez vos performances
         </p>
       </div>
