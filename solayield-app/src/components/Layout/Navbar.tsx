@@ -53,6 +53,16 @@ const Navbar: FC = () => {
                   Dashboard
                 </Link>
               )}
+              <Link
+                href="/admin"
+                className={`${
+                  isActive('/admin')
+                    ? 'text-indigo-400'
+                    : 'text-gray-300 hover:text-white'
+                } px-5 py-3 text-lg font-semibold transition-colors rounded-md`}
+              >
+                Admin
+              </Link>
             </div>
           </div>
           <div className="flex items-center space-x-8">
