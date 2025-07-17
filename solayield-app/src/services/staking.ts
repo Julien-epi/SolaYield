@@ -74,7 +74,6 @@ async function fetchStrategiesFromBlockchain(
       };
     });
   } catch (error) {
-    console.error("Erreur lors de la récupération des stratégies:", error);
     return [];
   }
 }
@@ -97,6 +96,100 @@ function getTokenSymbol(tokenMint: string): string {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const stakingService = {
+  // Convertir SOL en wrapped SOL
+  wrapSol: async (
+    amount: number,
+    wallet: any
+  ): Promise<{ success: boolean; txHash?: string; error?: string }> => {
+    try {
+      if (!wallet.publicKey) {
+        return { success: false, error: "Wallet non connecté" };
+      }
+
+      const connection = new Connection(
+        "https://api.devnet.solana.com",
+        "confirmed"
+      );
+
+      // Adresse du wrapped SOL mint
+      const wrappedSolMint = new PublicKey("So11111111111111111111111111111111111111112");
+      
+      // Montant en lamports
+      const amountLamports = Math.floor(amount * 1000000000);
+      
+      // Vérifier le solde
+      const balance = await connection.getBalance(wallet.publicKey);
+      const reservedForFees = 0.005 * 1000000000; // 0.005 SOL pour les frais
+      const requiredBalance = amountLamports + reservedForFees;
+      
+      if (balance < requiredBalance) {
+        const availableForWrapping = Math.max(0, (balance - reservedForFees) / 1000000000);
+        return { 
+          success: false, 
+          error: `Solde insuffisant. Disponible pour wrapping: ${availableForWrapping.toFixed(6)} SOL` 
+        };
+      }
+
+      // Calculer l'adresse du compte wrapped SOL de l'utilisateur
+      const userWrappedSolAccount = await getAssociatedTokenAddress(
+        wrappedSolMint,
+        wallet.publicKey
+      );
+
+      const transaction = new Transaction();
+
+      // Vérifier si le compte existe déjà
+      let accountExists = false;
+      try {
+        await getAccount(connection, userWrappedSolAccount);
+        accountExists = true;
+      } catch (error) {
+        // Le compte n'existe pas, l'ajouter à la transaction
+        const createAccountIx = createAssociatedTokenAccountInstruction(
+          wallet.publicKey,
+          userWrappedSolAccount,
+          wallet.publicKey,
+          wrappedSolMint
+        );
+        transaction.add(createAccountIx);
+      }
+
+      // Ajouter l'instruction pour transférer SOL vers le compte wrapped SOL
+      transaction.add(
+        anchor.web3.SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: userWrappedSolAccount,
+          lamports: amountLamports,
+        })
+      );
+
+      // Ajouter l'instruction pour synchroniser le compte wrapped SOL
+      transaction.add(
+        new anchor.web3.TransactionInstruction({
+          keys: [
+            { pubkey: userWrappedSolAccount, isSigner: false, isWritable: true },
+          ],
+          programId: TOKEN_PROGRAM_ID,
+          data: Buffer.from([17]), // SyncNative instruction
+        })
+      );
+
+      // Envoyer la transaction
+      const txHash = await wallet.sendTransaction(transaction, connection);
+      await connection.confirmTransaction(txHash, "confirmed");
+
+      return {
+        success: true,
+        txHash: txHash,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Erreur lors du wrapping",
+      };
+    }
+  },
+
   // Récupérer tous les pools (maintenant depuis la blockchain !)
   getPools: async (): Promise<StakingPool[]> => {
     await delay(500);
@@ -133,7 +226,6 @@ export const stakingService = {
       const program = getAnchorProgram(wallet, connection);
 
       // Extraire le strategy_id du poolId (format: "strategy-123")
-      console.log("poolId", poolId);
       const strategyIdStr = poolId.replace("strategy-", "");
       const strategyId = parseInt(strategyIdStr, 10);
       if (isNaN(strategyId)) {
@@ -142,8 +234,6 @@ export const stakingService = {
         );
       }
       const strategyIdBN = new anchor.BN(strategyId);
-      console.log("strategyId", strategyId);
-      console.log("strategyIdBN", strategyIdBN);
       // Convertir le montant en lamports (SOL -> lamports)
       const amountLamports = Math.floor(amount * 1000000000);
       const amountBN = new anchor.BN(amountLamports);
@@ -185,17 +275,23 @@ export const stakingService = {
           "La stratégie sélectionnée n'existe pas sur la blockchain. Veuillez rafraîchir la page."
         );
       }
+      
       if (!strategy.underlyingToken) {
         throw new Error(
-          "Le champ underlyingToken est manquant dans la stratégie."
+          `Le champ underlyingToken est manquant dans la stratégie. Champs disponibles: ${Object.keys(strategy).join(', ')}`
         );
       }
+      if (!strategy.yieldTokenMint) {
+        throw new Error(
+          `Le champ yieldTokenMint est manquant dans la stratégie. Champs disponibles: ${Object.keys(strategy).join(', ')}`
+        );
+      }
+      
       const underlyingTokenMint = new PublicKey(strategy.underlyingToken);
       const yieldTokenMint = new PublicKey(strategy.yieldTokenMint);
-      console.log(
-        "DEBUG underlyingTokenMint:",
-        underlyingTokenMint?.toBase58?.() || underlyingTokenMint
-      );
+
+      // Vérifier si c'est du wrapped SOL
+      const isWrappedSol = underlyingTokenMint.toString() === "So11111111111111111111111111111111111111112";
 
       // Calculer les comptes de tokens de l'utilisateur
       const userUnderlyingTokenAccount = await getAssociatedTokenAddress(
@@ -208,90 +304,60 @@ export const stakingService = {
         wallet.publicKey
       );
 
-      // Vérifier si le compte yield token de l'utilisateur existe
-      let createYieldTokenAccountIx = null;
-      try {
-        await getAccount(connection, userYieldTokenAccount);
-        console.log("✅ Compte yield token existe déjà");
-      } catch (error) {
-        console.log("🔧 Création du compte yield token nécessaire");
-        createYieldTokenAccountIx = createAssociatedTokenAccountInstruction(
-          wallet.publicKey,
-          userYieldTokenAccount,
-          wallet.publicKey,
-          yieldTokenMint
-        );
+
+
+      // Vérifier le solde - pour SOL, on vérifie le solde natif
+      if (isWrappedSol) {
+        // Pour SOL, vérifier le solde natif + frais de transaction + rent
+        const balance = await connection.getBalance(wallet.publicKey);
+        
+        // Réserver environ 0.01 SOL pour les frais de transaction et rent
+        const reservedForFees = 0.01 * 1000000000; // 0.01 SOL en lamports
+        const requiredBalance = amountLamports + reservedForFees;
+        
+        if (balance < requiredBalance) {
+          const availableForStaking = Math.max(0, (balance - reservedForFees) / 1000000000);
+          throw new Error(`Solde SOL insuffisant. Vous avez ${balance / 1000000000} SOL mais vous essayez de staker ${amount} SOL. Montant maximum disponible pour le staking : ${availableForStaking.toFixed(6)} SOL (0.01 SOL réservé pour les frais)`);
+        }
+      } else {
+        // Pour les autres tokens, vérifier le compte de tokens associé
+        try {
+          const underlyingTokenAccountInfo = await getAccount(connection, userUnderlyingTokenAccount);
+          
+          if (underlyingTokenAccountInfo.amount < BigInt(amountLamports)) {
+            throw new Error(`Solde de tokens insuffisant. Vous avez ${underlyingTokenAccountInfo.amount} mais vous essayez de staker ${amountLamports}`);
+          }
+        } catch (error) {
+          throw new Error("Votre compte de tokens n'existe pas ou n'a pas suffisamment de tokens");
+        }
       }
 
-      console.log("🔍 DEBUG stake - Informations reçues:", {
-        poolId_recu: poolId,
-        amount_recu: amount,
-        strategyId_extrait: strategyId,
-        strategyIdBN: strategyIdBN.toString(),
-      });
-
-      console.log("🚀 Staking vers la stratégie:", {
-        strategyId,
-        strategyName: strategy.name,
-        amount: `${amount} SOL (${amountLamports} lamports)`,
-        strategyPda: strategyPda.toString(),
-        userPosition: userPositionPda.toString(),
-        vault: strategyVaultPda.toString(),
-        userUnderlyingToken: userUnderlyingTokenAccount.toString(),
-        userYieldTokenAccount: userYieldTokenAccount.toString(),
-        needsYieldTokenCreation: !!createYieldTokenAccountIx,
-      });
-
-      // Si on a besoin de créer le compte yield token, on l'ajoute à la transaction
+      // Effectuer le dépôt
       let txHash;
-      if (createYieldTokenAccountIx) {
-        console.log(
-          "🔧 Création du compte yield token + dépôt en une transaction"
-        );
-        const transaction = new Transaction();
-        transaction.add(createYieldTokenAccountIx);
-        console.log("underlyingTokenMint", underlyingTokenMint);
-        console.log("type of underlyingTokenMint", typeof underlyingTokenMint);
-        const depositIx = await program.methods
-          .depositToStrategy(amountBN, strategyIdBN)
-          .accountsPartial({
-            user: wallet.publicKey,
-            strategy: strategyPda,
-            user_position: userPositionPda,
-            underlying_token_mint: underlyingTokenMint,
-            user_underlying_token: userUnderlyingTokenAccount,
-            strategy_vault: strategyVaultPda,
-            yield_token_mint: yieldTokenMint,
-            user_yield_token_account: userYieldTokenAccount,
-            token_program: TOKEN_PROGRAM_ID,
-            associated_token_program: ASSOCIATED_TOKEN_PROGRAM_ID,
-            system_program: anchor.web3.SystemProgram.programId,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-          })
-          .instruction();
-
-        transaction.add(depositIx);
-        txHash = await wallet.sendTransaction(transaction, connection);
-      } else {
-        // Le compte existe déjà, on peut directement faire le dépôt
-        console.log("✅ Dépôt direct (compte yield token existe)");
+      try {
         txHash = await program.methods
           .depositToStrategy(amountBN, strategyIdBN)
-          .accountsPartial({
+          .accounts({
             user: wallet.publicKey,
             strategy: strategyPda,
             user_position: userPositionPda,
-            underlying_token_mint: underlyingTokenMint,
-            user_underlying_token: userUnderlyingTokenAccount,
-            strategy_vault: strategyVaultPda,
-            yield_token_mint: yieldTokenMint,
-            user_yield_token_account: userYieldTokenAccount,
-            token_program: TOKEN_PROGRAM_ID,
-            associated_token_program: ASSOCIATED_TOKEN_PROGRAM_ID,
-            system_program: anchor.web3.SystemProgram.programId,
+            underlyingTokenMint: underlyingTokenMint,
+            userUnderlyingToken: userUnderlyingTokenAccount,
+            strategyVault: strategyVaultPda,
+            yieldTokenMint: yieldTokenMint,
+            userYieldTokenAccount: userYieldTokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            systemProgram: anchor.web3.SystemProgram.programId,
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,
           })
           .rpc();
+      } catch (rpcError: any) {
+        console.error("Erreur lors du dépôt:", rpcError);
+        if (rpcError.logs) {
+          console.error("Transaction logs:", rpcError.logs);
+        }
+        throw rpcError;
       }
 
       return {
@@ -299,7 +365,6 @@ export const stakingService = {
         txHash: txHash,
       };
     } catch (error) {
-      console.error("Erreur lors du staking:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : "Erreur inconnue",

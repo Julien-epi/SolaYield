@@ -20,14 +20,37 @@ const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isWrapping, setIsWrapping] = useState(false);
 
-  // Debug: Logger les vraies données du pool
-  console.log('🔍 DEBUG StakeForm - Pool reçu:', {
-    id: pool.id,
-    name: pool.name,
-    strategyId: pool.strategyId,
-    fullPool: pool
-  });
+
+
+  const handleWrapSol = async () => {
+    if (!publicKey) {
+      showToast('Erreur', 'Veuillez connecter votre wallet', 'error');
+      return;
+    }
+
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      showToast('Erreur', 'Veuillez entrer un montant valide', 'error');
+      return;
+    }
+
+    try {
+      setIsWrapping(true);
+      const result = await stakingService.wrapSol(amountNum, wallet);
+
+      if (result.success) {
+        showToast('Succès', 'SOL wrappé avec succès! Vous pouvez maintenant staker.', 'success');
+      } else {
+        showToast('Erreur', result.error || 'Une erreur est survenue lors du wrapping', 'error');
+      }
+    } catch (error) {
+      showToast('Erreur', 'Une erreur est survenue lors du wrapping', 'error');
+    } finally {
+      setIsWrapping(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,13 +76,11 @@ const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
 
       if (result.success) {
         showToast('Succès', 'Staking effectué avec succès', 'success');
-        console.log('🎉 Transaction hash:', result.txHash);
         onClose();
       } else {
         showToast('Erreur', result.error || 'Une erreur est survenue', 'error');
       }
     } catch (error) {
-      console.error('Erreur lors du staking:', error);
       showToast('Erreur', 'Une erreur est survenue lors du staking', 'error');
     } finally {
       setIsProcessing(false);
@@ -102,20 +123,42 @@ const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
         </p>
       </div>
 
-      <div className="flex gap-4 mt-4">
+      <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3">
+        <p className="text-sm text-blue-200">
+          💡 <strong>Étapes pour staker :</strong>
+        </p>
+        <ol className="text-sm text-blue-300 mt-1 ml-4 list-decimal">
+          <li>Wrapper vos SOL (conversion en wrapped SOL)</li>
+          <li>Staker vos wrapped SOL dans la stratégie</li>
+        </ol>
+      </div>
+
+      <div className="space-y-3 mt-4">
         <button
           type="button"
-          onClick={onClose}
-          className="flex-1 bg-gray-800 text-gray-100 border border-gray-700 px-4 py-3 rounded-lg text-base font-medium hover:bg-gray-700"
+          onClick={handleWrapSol}
+          disabled={isWrapping || isProcessing}
+          className="w-full bg-yellow-600 text-white px-4 py-3 rounded-lg text-base font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Annuler
+          {isWrapping ? 'Wrapping SOL...' : '1. Wrapper SOL d\'abord'}
         </button>
-        <button
-          type="submit"
-          className="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-lg text-base font-medium hover:bg-indigo-700"
-        >
-          Staker
-        </button>
+        
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-800 text-gray-100 border border-gray-700 px-4 py-3 rounded-lg text-base font-medium hover:bg-gray-700"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={isProcessing || isWrapping}
+            className="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-lg text-base font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isProcessing ? 'Staking...' : '2. Staker'}
+          </button>
+        </div>
       </div>
 
       <LoadingOverlay isVisible={isProcessing} />
