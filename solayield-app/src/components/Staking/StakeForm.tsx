@@ -14,11 +14,20 @@ interface StakeFormProps {
 }
 
 const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
-  const { publicKey } = useWallet();
+  const wallet = useWallet();
+  const { publicKey } = wallet;
   const { showToast } = useToast();
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Debug: Logger les vraies données du pool
+  console.log('🔍 DEBUG StakeForm - Pool reçu:', {
+    id: pool.id,
+    name: pool.name,
+    strategyId: pool.strategyId,
+    fullPool: pool
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,10 +49,11 @@ const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
 
     try {
       setIsProcessing(true);
-      const result = await stakingService.stake(pool.id, amountNum, publicKey);
+      const result = await stakingService.stake(pool.id, amountNum, wallet);
 
       if (result.success) {
         showToast('Succès', 'Staking effectué avec succès', 'success');
+        console.log('🎉 Transaction hash:', result.txHash);
         onClose();
       } else {
         showToast('Erreur', result.error || 'Une erreur est survenue', 'error');
@@ -79,7 +89,7 @@ const StakeForm: FC<StakeFormProps> = ({ pool, onClose }) => {
             onChange={(e) => setAmount(e.target.value)}
             className="block w-full rounded-lg border border-gray-700 bg-gray-800 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg px-5 py-4"
             placeholder="0.00"
-            step="0.01"
+            step="0.001"
             min={pool.minStake}
             required
           />

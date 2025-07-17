@@ -58,12 +58,11 @@ pub struct DepositToStrategy<'info> {
     )]
     pub yield_token_mint: Account<'info, Mint>,
 
-    /// User's yield token account (will be created if needed)
+    /// User's yield token account (must exist or be created beforehand)
     #[account(
-        init_if_needed,
-        payer = user,
-        associated_token::mint = yield_token_mint,
-        associated_token::authority = user
+        mut,
+        constraint = user_yield_token_account.mint == yield_token_mint.key() @ DepositError::WrongYieldTokenMint,
+        constraint = user_yield_token_account.owner == user.key() @ DepositError::WrongTokenOwner
     )]
     pub user_yield_token_account: Account<'info, TokenAccount>,
 
@@ -150,4 +149,6 @@ pub enum DepositError {
     WrongYieldTokenMint,
     #[msg("Invalid deposit amount")]
     InvalidAmount,
+    #[msg("Wrong token owner")]
+    WrongTokenOwner,
 } 

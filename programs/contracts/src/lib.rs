@@ -23,10 +23,10 @@ pub mod contracts {
     pub fn create_strategy(
         ctx: Context<CreateStrategy>,
         name: String,
-        apy_basis_points: u16,
+        apy_basis_points: u64,
         strategy_id: u64,
     ) -> Result<()> {
-        instructions::handle_create_strategy(ctx, name, apy_basis_points as u64, strategy_id)
+        instructions::handle_create_strategy(ctx, name, apy_basis_points, strategy_id)
     }
 
     /// Deposit tokens into a specific strategy

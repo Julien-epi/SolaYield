@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { getAnchorProgram } from '../../services/anchor';
-import * as anchor from '@project-serum/anchor';
+import * as anchor from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 
 const PROGRAM_ID = new PublicKey('BCz6K4XSaycH954PhZPPmwuistSyJP5p5Biya7frA2Az');
