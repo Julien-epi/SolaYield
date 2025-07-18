@@ -6,6 +6,7 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { getAnchorProgram } from "../../services/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { createTokenMetadata } from "../../services/metaplex-metadata";
 
 const PROGRAM_ID = new PublicKey(
   "BCz6K4XSaycH954PhZPPmwuistSyJP5p5Biya7frA2Az"
@@ -84,6 +85,23 @@ const CreateStrategyForm: React.FC = () => {
           rent: SYSVAR_RENT_PUBKEY,
         })
         .rpc();
+
+      // Créer la métadonnée Metaplex pour le mint du yToken
+      try {
+        await createTokenMetadata({
+          connection,
+          mint: yieldTokenMintPda,
+          payer: { publicKey, signTransaction },
+          name: `yToken ${strategyId}`,
+          symbol: `yTKN${strategyId}`,
+          uri: "",
+        });
+      } catch (e: any) {
+        if (!e.message?.includes("already in use")) {
+          console.error("Erreur création metadata:", e);
+        }
+      }
+
       alert("Stratégie créée avec succès !");
       setName("");
       setApy("");

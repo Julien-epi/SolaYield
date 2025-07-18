@@ -1,7 +1,7 @@
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   createCreateMetadataAccountV3Instruction,
-  PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID,
+  findMetadataPda,
 } from "@metaplex-foundation/mpl-token-metadata";
 
 export async function createTokenMetadata({
@@ -19,19 +19,8 @@ export async function createTokenMetadata({
   symbol: string;
   uri?: string;
 }) {
-  // Corrige le cas où TOKEN_METADATA_PROGRAM_ID serait une string
-  const metadataProgramId =
-    typeof TOKEN_METADATA_PROGRAM_ID === "string"
-      ? new PublicKey(TOKEN_METADATA_PROGRAM_ID)
-      : TOKEN_METADATA_PROGRAM_ID;
-  const [metadataPda] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("metadata"),
-      metadataProgramId.toBuffer(),
-      mint.toBuffer(),
-    ],
-    metadataProgramId
-  );
+  // Utilise la fonction utilitaire Metaplex pour le PDA
+  const metadataPda = findMetadataPda(mint);
 
   const accounts = {
     metadata: metadataPda,

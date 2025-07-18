@@ -1,60 +1,86 @@
-'use client';
+"use client";
 
-import { FC, useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useToast } from '@/contexts/ToastContext';
-import { YieldToken } from '@/services/marketplace';
-import { marketplaceService } from '@/services/marketplace';
-import LoadingSpinner from '@/components/UI/LoadingSpinner';
-import LoadingOverlay from '@/components/UI/LoadingOverlay';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { FC, useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useToast } from "@/contexts/ToastContext";
+import { YieldToken } from "@/services/marketplace";
+import { marketplaceService } from "@/services/marketplace";
+import LoadingSpinner from "@/components/UI/LoadingSpinner";
+import LoadingOverlay from "@/components/UI/LoadingOverlay";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface OrderFormProps {
   token: YieldToken;
-  type: 'buy' | 'sell';
+  type: "buy" | "sell";
   onClose: () => void;
 }
 
 const OrderForm: FC<OrderFormProps> = ({ token, type, onClose }) => {
-  const { publicKey } = useWallet();
+  const { publicKey, signTransaction, signAllTransactions, connected } =
+    useWallet();
   const { showToast } = useToast();
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Construction wallet Anchor-compatible
+  const anchorWallet =
+    publicKey && signTransaction && signAllTransactions
+      ? { publicKey, signTransaction, signAllTransactions }
+      : undefined;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!publicKey) {
-      showToast('Erreur', 'Veuillez connecter votre wallet', 'error');
+    if (!connected || !anchorWallet) {
+      showToast(
+        "Erreur",
+        "Veuillez connecter votre wallet compatible Solana",
+        "error"
+      );
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
-      showToast('Erreur', 'Veuillez entrer un montant valide', 'error');
+      showToast("Erreur", "Veuillez entrer un montant valide", "error");
       return;
     }
 
-    if (type === 'buy' && amountNum > token.availableSupply) {
-      showToast('Erreur', 'Montant supérieur à l\'offre disponible', 'error');
+    if (type === "buy" && amountNum > token.availableSupply) {
+      showToast("Erreur", "Montant supérieur à l'offre disponible", "error");
       return;
     }
 
     try {
       setIsProcessing(true);
-      const result = type === 'buy'
-        ? await marketplaceService.createBuyOrder(token.id, amountNum, token.price, publicKey)
-        : await marketplaceService.createSellOrder(token.id, amountNum, token.price, publicKey);
+
+      const result = await marketplaceService.placeOrderOnChain({
+        type,
+        tokenId: token.id,
+        amount: amountNum,
+        price: token.price,
+        wallet: anchorWallet,
+      });
 
       if (result.success) {
-        showToast('Succès', `Ordre de ${type === 'buy' ? 'achat' : 'vente'} créé avec succès`, 'success');
+        showToast(
+          "Succès",
+          `Ordre de ${
+            type === "buy" ? "achat" : "vente"
+          } envoyé à la blockchain`,
+          "success"
+        );
         onClose();
       } else {
-        showToast('Erreur', result.error || 'Une erreur est survenue', 'error');
+        showToast(
+          "Erreur",
+          result.error || "Erreur lors de la signature",
+          "error"
+        );
       }
     } catch (error) {
-      console.error('Erreur lors de la création de l\'ordre:', error);
-      showToast('Erreur', 'Une erreur est survenue lors de la création de l\'ordre', 'error');
+      console.error("Erreur lors de la création de l'ordre:", error);
+      showToast("Erreur", "Erreur lors de la création de l'ordre", "error");
     } finally {
       setIsProcessing(false);
     }
@@ -72,7 +98,7 @@ const OrderForm: FC<OrderFormProps> = ({ token, type, onClose }) => {
     <div className="modal p-8 rounded-lg shadow-2xl bg-gray-900 text-gray-100 max-w-xl mx-auto min-h-[380px] flex flex-col justify-center">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-100">
-          {type === 'buy' ? 'Acheter' : 'Vendre'} {token.symbol}
+          {type === "buy" ? "Acheter" : "Vendre"} {token.symbol}
         </h2>
         <button
           onClick={onClose}
@@ -82,9 +108,15 @@ const OrderForm: FC<OrderFormProps> = ({ token, type, onClose }) => {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8 flex-1 flex flex-col justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-8 flex-1 flex flex-col justify-center"
+      >
         <div>
-          <label htmlFor="amount" className="block text-base font-medium text-gray-200 mb-2">
+          <label
+            htmlFor="amount"
+            className="block text-base font-medium text-gray-200 mb-2"
+          >
             Montant
           </label>
           <input
@@ -117,13 +149,19 @@ const OrderForm: FC<OrderFormProps> = ({ token, type, onClose }) => {
           <button
             type="submit"
             className="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-lg text-base font-medium hover:bg-indigo-700"
+            disabled={isProcessing}
           >
-            {type === 'buy' ? 'Acheter' : 'Vendre'}
+            {isProcessing
+              ? "Envoi en cours..."
+              : type === "buy"
+              ? "Acheter"
+              : "Vendre"}
           </button>
           <button
             type="button"
             onClick={onClose}
             className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-100 font-medium px-4 py-3 rounded-lg text-base"
+            disabled={isProcessing}
           >
             Annuler
           </button>
@@ -135,4 +173,4 @@ const OrderForm: FC<OrderFormProps> = ({ token, type, onClose }) => {
   );
 };
 
-export default OrderForm; 
+export default OrderForm;
