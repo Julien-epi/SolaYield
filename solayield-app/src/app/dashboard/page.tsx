@@ -75,13 +75,11 @@ const DashboardPage: FC = () => {
           title="Valeur Totale Lockée"
           value={`$${stats.totalValueLocked.toLocaleString()}`}
           icon={<LockClosedIcon className="h-6 w-6 text-indigo-600" />}
-          trend={{ value: 5.2, isPositive: true }}
         />
         <StatCard
           title="Yield Total Gagné"
           value={`$${stats.totalYieldEarned.toLocaleString()}`}
           icon={<CurrencyDollarIcon className="h-6 w-6 text-indigo-600" />}
-          trend={{ value: 3.8, isPositive: true }}
         />
         <StatCard
           title="Positions Actives"
