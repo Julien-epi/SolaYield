@@ -78,40 +78,6 @@ const PositionCard: FC<PositionCardProps> = ({ position }) => {
             {position.status === 'active' ? 'Actif' : 'Maturé'}
           </span>
         </div>
-        <>
-          <button
-            className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
-            onClick={() => setIsModalOpen(true)}
-            disabled={isLoading}
-          >
-            Racheter (Redeem)
-          </button>
-          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Confirmation" showCloseButton>
-            <div className="space-y-6">
-              <p>Êtes-vous sûr de vouloir racheter cette position ?</p>
-              {isLoading ? (
-                <LoadingSpinner size="md" color="primary" />
-              ) : (
-                <div className="flex justify-end gap-4">
-                  <button
-                    className="px-4 py-2 rounded bg-gray-700 text-gray-200 hover:bg-gray-600"
-                    onClick={() => setIsModalOpen(false)}
-                    disabled={isLoading}
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
-                    onClick={handleRedeem}
-                    disabled={isLoading}
-                  >
-                    Confirmer
-                  </button>
-                </div>
-              )}
-            </div>
-          </Modal>
-        </>
       </div>
     </div>
   );

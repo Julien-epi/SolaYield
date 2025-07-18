@@ -8,7 +8,7 @@ import WalletButton from '@/components/Wallet/WalletButton';
 
 const Navbar: FC = () => {
   const pathname = usePathname();
-  const { connected } = useWallet();
+  const { connected, publicKey } = useWallet();
 
   const isActive = (path: string) => pathname === path;
 
@@ -53,6 +53,7 @@ const Navbar: FC = () => {
                   Dashboard
                 </Link>
               )}
+              {process.env.NEXT_PUBLIC_ADMIN_ADDRESS === publicKey?.toBase58() && (
               <Link
                 href="/admin"
                 className={`${
@@ -60,9 +61,10 @@ const Navbar: FC = () => {
                     ? 'text-indigo-400'
                     : 'text-gray-300 hover:text-white'
                 } px-5 py-3 text-lg font-semibold transition-colors rounded-md`}
-              >
-                Admin
-              </Link>
+                >
+                  Admin
+                </Link>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-8">
