@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { FC, useState, useEffect } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
-import Modal from '@/components/UI/Modal';
-import YieldTokenCard from '@/components/Marketplace/YieldTokenCard';
-import OrderForm from '@/components/Marketplace/OrderForm';
-import { marketplaceService, YieldToken } from '@/services/marketplace';
-import LoadingSpinner from '@/components/UI/LoadingSpinner';
+import { FC, useState, useEffect } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import Modal from "@/components/UI/Modal";
+import YieldTokenCard from "@/components/Marketplace/YieldTokenCard";
+import OrderForm from "@/components/Marketplace/OrderForm";
+import { marketplaceService, YieldToken } from "@/services/marketplace";
+import LoadingSpinner from "@/components/UI/LoadingSpinner";
 
 const MarketplacePage: FC = () => {
   const { connected } = useWallet();
@@ -14,7 +14,7 @@ const MarketplacePage: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState<YieldToken | null>(null);
-  const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy');
+  const [orderType, setOrderType] = useState<"buy" | "sell">("buy");
 
   useEffect(() => {
     const loadTokens = async () => {
@@ -22,7 +22,7 @@ const MarketplacePage: FC = () => {
         const tokensData = await marketplaceService.getYieldTokens();
         setTokens(tokensData);
       } catch (error) {
-        console.error('Erreur lors du chargement des tokens:', error);
+        console.error("Erreur lors du chargement des tokens:", error);
       } finally {
         setIsLoading(false);
       }
@@ -33,13 +33,13 @@ const MarketplacePage: FC = () => {
 
   const handleBuy = (token: YieldToken) => {
     setSelectedToken(token);
-    setOrderType('buy');
+    setOrderType("buy");
     setIsModalOpen(true);
   };
 
   const handleSell = (token: YieldToken) => {
     setSelectedToken(token);
-    setOrderType('sell');
+    setOrderType("sell");
     setIsModalOpen(true);
   };
 
@@ -50,7 +50,7 @@ const MarketplacePage: FC = () => {
       </div>
     );
   }
-
+  console.log("tokens", tokens);
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -62,13 +62,15 @@ const MarketplacePage: FC = () => {
 
       {!connected ? (
         <div className="text-center p-8 bg-white rounded-lg shadow-sm">
-          <p className="text-gray-600">Connectez votre wallet pour accéder à la marketplace</p>
+          <p className="text-gray-600">
+            Connectez votre wallet pour accéder à la marketplace
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {tokens.map((token) => (
+          {tokens.map((token, index) => (
             <YieldTokenCard
-              key={token.id}
+              key={token.id + index}
               token={token}
               onBuy={handleBuy}
               onSell={handleSell}
@@ -80,7 +82,7 @@ const MarketplacePage: FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={''}
+        title={""}
         showCloseButton={false}
       >
         {selectedToken && (
@@ -95,4 +97,4 @@ const MarketplacePage: FC = () => {
   );
 };
 
-export default MarketplacePage; 
+export default MarketplacePage;

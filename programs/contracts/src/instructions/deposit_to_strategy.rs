@@ -19,7 +19,7 @@ pub struct DepositToStrategy<'info> {
     pub strategy: Account<'info, Strategy>,
 
     #[account(
-        init,
+        init_if_needed,
         payer = user,
         seeds = [b"user_position", user.key().as_ref(), strategy.key().as_ref()],
         bump,

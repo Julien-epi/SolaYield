@@ -1,4 +1,6 @@
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, Connection } from '@solana/web3.js';
+import { getAnchorProgram } from './anchor';
+import * as anchor from '@coral-xyz/anchor';
 
 export interface YieldToken {
   id: string;
@@ -81,11 +83,49 @@ const orders: Order[] = [
 // Simuler un délai réseau
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Helper pour convertir un Pubkey en symbole de token
+function getTokenSymbol(tokenMint: string): string {
+  if (tokenMint === 'So11111111111111111111111111111111111111112') return 'SOL';
+  if (tokenMint === 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr') return 'USDC';
+  return tokenMint.slice(0, 4) + '...' + tokenMint.slice(-4);
+}
+
+// Helper pour convertir un compte Marketplace Anchor en YieldToken front
+function marketplaceAccountToYieldToken(account: any): YieldToken {
+  return {
+    id: account.marketplaceId ? account.marketplaceId.toString() : account.yield_token_mint?.toString() ?? '',
+    name: `Yield Token ${getTokenSymbol(account.underlying_token_mint?.toString() ?? '')}`,
+    symbol: getTokenSymbol(account.yield_token_mint?.toString() ?? ''),
+    underlyingToken: getTokenSymbol(account.underlying_token_mint?.toString() ?? ''),
+    apy: 0, // L'APY n'est pas dans Marketplace, il faut aller le chercher dans Strategy si besoin
+    price: account.best_ask_price ? Number(account.best_ask_price) / 1_000_000 : 0,
+    totalSupply: 0, // Non disponible ici
+    availableSupply: 0, // Non disponible ici
+    maturityDate: new Date(account.created_at ? Number(account.created_at) * 1000 : Date.now()),
+    issuer: account.admin?.toString() ?? '',
+  };
+}
+
 export const marketplaceService = {
-  // Récupérer tous les tokens de yield
+  // Récupérer tous les tokens de yield depuis la blockchain
   getYieldTokens: async (): Promise<YieldToken[]> => {
-    await delay(500);
-    return yieldTokens;
+    try {
+      const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+      // Wallet factice pour lecture seule
+      const fakeWallet = {
+        publicKey: new PublicKey('11111111111111111111111111111111'),
+        signTransaction: async () => { throw new Error('Read-only wallet'); },
+        signAllTransactions: async () => { throw new Error('Read-only wallet'); },
+      };
+      const program = getAnchorProgram(fakeWallet, connection);
+      // Récupérer tous les comptes Marketplace
+      const marketplaces = await (program.account as any).marketplace.all();
+      // Mapper vers le format front
+      return marketplaces.map((m: any) => marketplaceAccountToYieldToken(m.account));
+    } catch (e) {
+      console.error('Erreur lors du fetch des marketplaces:', e);
+      return [];
+    }
   },
 
   // Récupérer un token spécifique

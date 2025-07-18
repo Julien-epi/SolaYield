@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { FC, useState } from 'react';
-import { YieldToken } from '@/services/marketplace';
-import Modal from '@/components/UI/Modal';
-import LoadingSpinner from '@/components/UI/LoadingSpinner';
-import { useToast } from '@/contexts/ToastContext';
+import { FC, useState } from "react";
+import { YieldToken } from "@/services/marketplace";
+import Modal from "@/components/UI/Modal";
+import LoadingSpinner from "@/components/UI/LoadingSpinner";
+import { useToast } from "@/contexts/ToastContext";
 
 interface YieldTokenCardProps {
   token: YieldToken;
@@ -14,10 +14,10 @@ interface YieldTokenCardProps {
 
 const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(date).toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -30,10 +30,10 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
     setIsLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000)); // simulation
-      toast.showToast('Succès', 'Rachat effectué avec succès !', 'success');
+      toast.showToast("Succès", "Rachat effectué avec succès !", "success");
       setIsModalOpen(false);
     } catch (e) {
-      toast.showToast('Erreur', "Le rachat a échoué.", 'error');
+      toast.showToast("Erreur", "Le rachat a échoué.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -43,11 +43,13 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
     <div className="card rounded-xl shadow-lg p-8 bg-gray-900 border-2 border-gray-700">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-xl font-bold text-gray-100">{token.name}</h3>
+          <h3 className="text-xl font-bold text-gray-100">strategy-{token.id}</h3>
           <p className="text-sm text-gray-400">{token.symbol}</p>
         </div>
         <div className="text-right">
-          <p className="text-lg font-semibold text-gray-100">${token.price.toFixed(2)}</p>
+          <p className="text-lg font-semibold text-gray-100">
+            ${token.price.toFixed(2)}
+          </p>
           <p className="text-sm text-indigo-400">{token.apy}% APY</p>
         </div>
       </div>
@@ -55,15 +57,21 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
       <div className="space-y-3 mb-6">
         <div className="flex justify-between">
           <span className="text-gray-400">Total Supply</span>
-          <span className="text-gray-100">{token.totalSupply.toLocaleString()}</span>
+          <span className="text-gray-100">
+            {token.totalSupply.toLocaleString()}
+          </span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Available Supply</span>
-          <span className="text-gray-100">{token.availableSupply.toLocaleString()}</span>
+          <span className="text-gray-100">
+            {token.availableSupply.toLocaleString()}
+          </span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Maturity Date</span>
-          <span className="text-gray-100">{formatDate(token.maturityDate)}</span>
+          <span className="text-gray-100">
+            {formatDate(token.maturityDate)}
+          </span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">Issuer</span>
@@ -93,7 +101,12 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
             >
               Racheter (Redeem)
             </button>
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Confirmation" showCloseButton>
+            <Modal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              title="Confirmation"
+              showCloseButton
+            >
               <div className="space-y-6">
                 <p>Êtes-vous sûr de vouloir racheter ce Yield Token ?</p>
                 {isLoading ? (
@@ -125,4 +138,4 @@ const YieldTokenCard: FC<YieldTokenCardProps> = ({ token, onBuy, onSell }) => {
   );
 };
 
-export default YieldTokenCard; 
+export default YieldTokenCard;

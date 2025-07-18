@@ -9,7 +9,16 @@
   "instructions": [
     {
       "name": "cancel_order",
-      "discriminator": [95, 129, 237, 240, 8, 49, 223, 132],
+      "discriminator": [
+        95,
+        129,
+        237,
+        240,
+        8,
+        49,
+        223,
+        132
+      ],
       "accounts": [
         {
           "name": "user",
@@ -27,7 +36,13 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [111, 114, 100, 101, 114]
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
               },
               {
                 "kind": "account",
@@ -42,13 +57,22 @@
         },
         {
           "name": "escrow_account",
-          "docs": ["Escrow account holding tokens"],
+          "docs": [
+            "Escrow account holding tokens"
+          ],
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [101, 115, 99, 114, 111, 119]
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
               },
               {
                 "kind": "account",
@@ -59,7 +83,9 @@
         },
         {
           "name": "user_token_account",
-          "docs": ["User's token account to receive refund"],
+          "docs": [
+            "User's token account to receive refund"
+          ],
           "writable": true
         },
         {
@@ -76,8 +102,19 @@
     },
     {
       "name": "claim_yield",
-      "docs": ["Claim accumulated yield from a strategy"],
-      "discriminator": [49, 74, 111, 7, 186, 22, 61, 165],
+      "docs": [
+        "Claim accumulated yield from a strategy"
+      ],
+      "discriminator": [
+        49,
+        74,
+        111,
+        7,
+        186,
+        22,
+        61,
+        165
+      ],
       "accounts": [
         {
           "name": "user",
@@ -91,7 +128,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 114, 97, 116, 101, 103, 121]
+                "value": [
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121
+                ]
               },
               {
                 "kind": "arg",
@@ -108,7 +154,19 @@
               {
                 "kind": "const",
                 "value": [
-                  117, 115, 101, 114, 95, 112, 111, 115, 105, 116, 105, 111, 110
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
                 ]
               },
               {
@@ -124,12 +182,16 @@
         },
         {
           "name": "yield_token_mint",
-          "docs": ["Yield token mint for this strategy"],
+          "docs": [
+            "Yield token mint for this strategy"
+          ],
           "writable": true
         },
         {
           "name": "user_yield_token_account",
-          "docs": ["User's yield token account"],
+          "docs": [
+            "User's yield token account"
+          ],
           "writable": true
         },
         {
@@ -146,7 +208,16 @@
     },
     {
       "name": "create_marketplace",
-      "discriminator": [6, 47, 242, 139, 213, 113, 5, 220],
+      "discriminator": [
+        6,
+        47,
+        242,
+        139,
+        213,
+        113,
+        5,
+        220
+      ],
       "accounts": [
         {
           "name": "admin",
@@ -159,7 +230,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 114, 97, 116, 101, 103, 121]
+                "value": [
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121
+                ]
               },
               {
                 "kind": "arg",
@@ -175,7 +255,19 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [109, 97, 114, 107, 101, 116, 112, 108, 97, 99, 101]
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  112,
+                  108,
+                  97,
+                  99,
+                  101
+                ]
               },
               {
                 "kind": "account",
@@ -192,8 +284,25 @@
               {
                 "kind": "const",
                 "value": [
-                  109, 97, 114, 107, 101, 116, 112, 108, 97, 99, 101, 95, 99,
-                  111, 117, 110, 116, 101, 114
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116,
+                  112,
+                  108,
+                  97,
+                  99,
+                  101,
+                  95,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
                 ]
               }
             ]
@@ -201,11 +310,15 @@
         },
         {
           "name": "yield_token_mint",
-          "docs": ["Yield token mint for this strategy"]
+          "docs": [
+            "Yield token mint for this strategy"
+          ]
         },
         {
           "name": "underlying_token_mint",
-          "docs": ["Underlying token mint"]
+          "docs": [
+            "Underlying token mint"
+          ]
         },
         {
           "name": "system_program",
@@ -233,8 +346,19 @@
     },
     {
       "name": "create_strategy",
-      "docs": ["Create a new yield strategy (admin only)"],
-      "discriminator": [152, 160, 107, 148, 245, 190, 127, 224],
+      "docs": [
+        "Create a new yield strategy (admin only)"
+      ],
+      "discriminator": [
+        152,
+        160,
+        107,
+        148,
+        245,
+        190,
+        127,
+        224
+      ],
       "accounts": [
         {
           "name": "admin",
@@ -248,7 +372,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 114, 97, 116, 101, 103, 121]
+                "value": [
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121
+                ]
               },
               {
                 "kind": "arg",
@@ -265,8 +398,22 @@
               {
                 "kind": "const",
                 "value": [
-                  115, 116, 114, 97, 116, 101, 103, 121, 95, 99, 111, 117, 110,
-                  116, 101, 114
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121,
+                  95,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
                 ]
               }
             ]
@@ -274,7 +421,9 @@
         },
         {
           "name": "underlying_token",
-          "docs": ["The underlying token mint (SOL, USDC, etc.)"]
+          "docs": [
+            "The underlying token mint (SOL, USDC, etc.)"
+          ]
         },
         {
           "name": "yield_token_mint",
@@ -283,7 +432,19 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [121, 105, 101, 108, 100, 95, 116, 111, 107, 101, 110]
+                "value": [
+                  121,
+                  105,
+                  101,
+                  108,
+                  100,
+                  95,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110
+                ]
               },
               {
                 "kind": "arg",
@@ -322,8 +483,19 @@
     },
     {
       "name": "deposit_to_strategy",
-      "docs": ["Deposit tokens into a specific strategy"],
-      "discriminator": [193, 61, 195, 221, 81, 161, 9, 170],
+      "docs": [
+        "Deposit tokens into a specific strategy"
+      ],
+      "discriminator": [
+        193,
+        61,
+        195,
+        221,
+        81,
+        161,
+        9,
+        170
+      ],
       "accounts": [
         {
           "name": "user",
@@ -337,7 +509,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 114, 97, 116, 101, 103, 121]
+                "value": [
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121
+                ]
               },
               {
                 "kind": "arg",
@@ -354,7 +535,19 @@
               {
                 "kind": "const",
                 "value": [
-                  117, 115, 101, 114, 95, 112, 111, 115, 105, 116, 105, 111, 110
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
                 ]
               },
               {
@@ -370,23 +563,41 @@
         },
         {
           "name": "underlying_token_mint",
-          "docs": ["The underlying token mint"]
+          "docs": [
+            "The underlying token mint"
+          ]
         },
         {
           "name": "user_underlying_token",
-          "docs": ["User's token account for the underlying token"],
+          "docs": [
+            "User's token account for the underlying token"
+          ],
           "writable": true
         },
         {
           "name": "strategy_vault",
-          "docs": ["Strategy's vault for holding underlying tokens"],
+          "docs": [
+            "Strategy's vault for holding underlying tokens"
+          ],
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  115, 116, 114, 97, 116, 101, 103, 121, 95, 118, 97, 117, 108,
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
                   116
                 ]
               },
@@ -399,7 +610,9 @@
         },
         {
           "name": "yield_token_mint",
-          "docs": ["Yield token mint for this strategy"],
+          "docs": [
+            "Yield token mint for this strategy"
+          ],
           "writable": true
         },
         {
@@ -439,7 +652,16 @@
     },
     {
       "name": "execute_trade",
-      "discriminator": [77, 16, 192, 135, 13, 0, 106, 97],
+      "discriminator": [
+        77,
+        16,
+        192,
+        135,
+        13,
+        0,
+        106,
+        97
+      ],
       "accounts": [
         {
           "name": "executor",
@@ -452,23 +674,36 @@
         },
         {
           "name": "buy_order",
-          "docs": ["Buy order"],
+          "docs": [
+            "Buy order"
+          ],
           "writable": true
         },
         {
           "name": "sell_order",
-          "docs": ["Sell order"],
+          "docs": [
+            "Sell order"
+          ],
           "writable": true
         },
         {
           "name": "buy_order_escrow",
-          "docs": ["Buy order escrow (contains underlying tokens)"],
+          "docs": [
+            "Buy order escrow (contains underlying tokens)"
+          ],
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [101, 115, 99, 114, 111, 119]
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
               },
               {
                 "kind": "account",
@@ -479,13 +714,22 @@
         },
         {
           "name": "sell_order_escrow",
-          "docs": ["Sell order escrow (contains yield tokens)"],
+          "docs": [
+            "Sell order escrow (contains yield tokens)"
+          ],
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [101, 115, 99, 114, 111, 119]
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
               },
               {
                 "kind": "account",
@@ -496,22 +740,30 @@
         },
         {
           "name": "buyer_yield_token_account",
-          "docs": ["Buyer's yield token account (receives yield tokens)"],
+          "docs": [
+            "Buyer's yield token account (receives yield tokens)"
+          ],
           "writable": true
         },
         {
           "name": "buyer_underlying_token_account",
-          "docs": ["Buyer's underlying token account (for fee collection)"],
+          "docs": [
+            "Buyer's underlying token account (for fee collection)"
+          ],
           "writable": true
         },
         {
           "name": "seller_underlying_token_account",
-          "docs": ["Seller's underlying token account (receives payment)"],
+          "docs": [
+            "Seller's underlying token account (receives payment)"
+          ],
           "writable": true
         },
         {
           "name": "fee_collection_account",
-          "docs": ["Marketplace fee collection account"],
+          "docs": [
+            "Marketplace fee collection account"
+          ],
           "writable": true
         },
         {
@@ -528,8 +780,19 @@
     },
     {
       "name": "initialize_protocol",
-      "docs": ["Initialize the SolaYield protocol"],
-      "discriminator": [188, 233, 252, 106, 134, 146, 202, 91],
+      "docs": [
+        "Initialize the SolaYield protocol"
+      ],
+      "discriminator": [
+        188,
+        233,
+        252,
+        106,
+        134,
+        146,
+        202,
+        91
+      ],
       "accounts": [
         {
           "name": "admin",
@@ -544,8 +807,22 @@
               {
                 "kind": "const",
                 "value": [
-                  115, 116, 114, 97, 116, 101, 103, 121, 95, 99, 111, 117, 110,
-                  116, 101, 114
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121,
+                  95,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
                 ]
               }
             ]
@@ -564,7 +841,16 @@
     },
     {
       "name": "place_order",
-      "discriminator": [51, 194, 155, 175, 109, 130, 96, 106],
+      "discriminator": [
+        51,
+        194,
+        155,
+        175,
+        109,
+        130,
+        96,
+        106
+      ],
       "accounts": [
         {
           "name": "user",
@@ -582,7 +868,13 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [111, 114, 100, 101, 114]
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
               },
               {
                 "kind": "account",
@@ -603,7 +895,19 @@
               {
                 "kind": "const",
                 "value": [
-                  111, 114, 100, 101, 114, 95, 99, 111, 117, 110, 116, 101, 114
+                  111,
+                  114,
+                  100,
+                  101,
+                  114,
+                  95,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
                 ]
               }
             ]
@@ -611,31 +915,48 @@
         },
         {
           "name": "yield_token_mint",
-          "docs": ["Yield token mint"]
+          "docs": [
+            "Yield token mint"
+          ]
         },
         {
           "name": "underlying_token_mint",
-          "docs": ["Underlying token mint"]
+          "docs": [
+            "Underlying token mint"
+          ]
         },
         {
           "name": "user_yield_token_account",
-          "docs": ["User's yield token account (for sell orders)"],
+          "docs": [
+            "User's yield token account (for sell orders)"
+          ],
           "writable": true
         },
         {
           "name": "user_underlying_token_account",
-          "docs": ["User's underlying token account (for buy orders)"],
+          "docs": [
+            "User's underlying token account (for buy orders)"
+          ],
           "writable": true
         },
         {
           "name": "escrow_account",
-          "docs": ["Escrow account for holding tokens during order"],
+          "docs": [
+            "Escrow account for holding tokens during order"
+          ],
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [101, 115, 99, 114, 111, 119]
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
               },
               {
                 "kind": "account",
@@ -678,7 +999,16 @@
     },
     {
       "name": "redeem_yield_tokens",
-      "discriminator": [121, 225, 160, 37, 49, 202, 39, 37],
+      "discriminator": [
+        121,
+        225,
+        160,
+        37,
+        49,
+        202,
+        39,
+        37
+      ],
       "accounts": [
         {
           "name": "user",
@@ -692,7 +1022,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 114, 97, 116, 101, 103, 121]
+                "value": [
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121
+                ]
               },
               {
                 "kind": "arg",
@@ -709,7 +1048,19 @@
               {
                 "kind": "const",
                 "value": [
-                  117, 115, 101, 114, 95, 112, 111, 115, 105, 116, 105, 111, 110
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
                 ]
               },
               {
@@ -725,14 +1076,28 @@
         },
         {
           "name": "strategy_vault",
-          "docs": ["Strategy's vault for underlying tokens"],
+          "docs": [
+            "Strategy's vault for underlying tokens"
+          ],
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  115, 116, 114, 97, 116, 101, 103, 121, 95, 118, 97, 117, 108,
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
                   116
                 ]
               },
@@ -745,7 +1110,9 @@
         },
         {
           "name": "yield_token_mint",
-          "docs": ["Yield token mint for this strategy"],
+          "docs": [
+            "Yield token mint for this strategy"
+          ],
           "writable": true
         },
         {
@@ -780,8 +1147,19 @@
     },
     {
       "name": "withdraw_from_strategy",
-      "docs": ["Withdraw principal from a strategy"],
-      "discriminator": [140, 239, 65, 54, 125, 128, 223, 125],
+      "docs": [
+        "Withdraw principal from a strategy"
+      ],
+      "discriminator": [
+        140,
+        239,
+        65,
+        54,
+        125,
+        128,
+        223,
+        125
+      ],
       "accounts": [
         {
           "name": "user",
@@ -795,7 +1173,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 114, 97, 116, 101, 103, 121]
+                "value": [
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121
+                ]
               },
               {
                 "kind": "arg",
@@ -812,7 +1199,19 @@
               {
                 "kind": "const",
                 "value": [
-                  117, 115, 101, 114, 95, 112, 111, 115, 105, 116, 105, 111, 110
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
                 ]
               },
               {
@@ -828,14 +1227,28 @@
         },
         {
           "name": "strategy_vault",
-          "docs": ["Strategy's vault for underlying tokens"],
+          "docs": [
+            "Strategy's vault for underlying tokens"
+          ],
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  115, 116, 114, 97, 116, 101, 103, 121, 95, 118, 97, 117, 108,
+                  115,
+                  116,
+                  114,
+                  97,
+                  116,
+                  101,
+                  103,
+                  121,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
                   116
                 ]
               },
@@ -848,7 +1261,9 @@
         },
         {
           "name": "user_underlying_token",
-          "docs": ["User's token account for receiving underlying tokens"],
+          "docs": [
+            "User's token account for receiving underlying tokens"
+          ],
           "writable": true
         },
         {
@@ -871,58 +1286,136 @@
   "accounts": [
     {
       "name": "Marketplace",
-      "discriminator": [70, 222, 41, 62, 78, 3, 32, 174]
+      "discriminator": [
+        70,
+        222,
+        41,
+        62,
+        78,
+        3,
+        32,
+        174
+      ]
     },
     {
       "name": "MarketplaceCounter",
-      "discriminator": [37, 216, 70, 234, 111, 16, 108, 17]
+      "discriminator": [
+        37,
+        216,
+        70,
+        234,
+        111,
+        16,
+        108,
+        17
+      ]
     },
     {
       "name": "OrderCounter",
-      "discriminator": [124, 210, 2, 119, 178, 200, 59, 95]
+      "discriminator": [
+        124,
+        210,
+        2,
+        119,
+        178,
+        200,
+        59,
+        95
+      ]
     },
     {
       "name": "Strategy",
-      "discriminator": [174, 110, 39, 119, 82, 106, 169, 102]
+      "discriminator": [
+        174,
+        110,
+        39,
+        119,
+        82,
+        106,
+        169,
+        102
+      ]
     },
     {
       "name": "StrategyCounter",
-      "discriminator": [227, 179, 54, 37, 154, 29, 151, 214]
+      "discriminator": [
+        227,
+        179,
+        54,
+        37,
+        154,
+        29,
+        151,
+        214
+      ]
     },
     {
       "name": "TradeOrder",
-      "discriminator": [58, 252, 74, 166, 147, 29, 238, 173]
+      "discriminator": [
+        58,
+        252,
+        74,
+        166,
+        147,
+        29,
+        238,
+        173
+      ]
     },
     {
       "name": "UserPosition",
-      "discriminator": [251, 248, 209, 245, 83, 234, 17, 27]
+      "discriminator": [
+        251,
+        248,
+        209,
+        245,
+        83,
+        234,
+        17,
+        27
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "Unauthorized",
-      "msg": "Unauthorized to create marketplace"
+      "name": "MarketplaceNotActive",
+      "msg": "Marketplace is not active"
     },
     {
       "code": 6001,
-      "name": "StrategyNotActive",
-      "msg": "Strategy is not active"
-    },
-    {
-      "code": 6002,
       "name": "WrongYieldTokenMint",
       "msg": "Wrong yield token mint"
     },
     {
-      "code": 6003,
+      "code": 6002,
       "name": "WrongUnderlyingToken",
       "msg": "Wrong underlying token mint"
     },
     {
+      "code": 6003,
+      "name": "WrongTokenAccount",
+      "msg": "Wrong token account"
+    },
+    {
       "code": 6004,
-      "name": "FeeTooHigh",
-      "msg": "Trading fee too high (max 10%)"
+      "name": "InvalidAmount",
+      "msg": "Invalid order amount"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidPrice",
+      "msg": "Invalid order price"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidOrderType",
+      "msg": "Invalid order type"
+    },
+    {
+      "code": 6007,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance"
     }
   ],
   "types": [
@@ -933,32 +1426,44 @@
         "fields": [
           {
             "name": "admin",
-            "docs": ["Admin who manages the marketplace"],
+            "docs": [
+              "Admin who manages the marketplace"
+            ],
             "type": "pubkey"
           },
           {
             "name": "strategy",
-            "docs": ["Strategy this marketplace is for"],
+            "docs": [
+              "Strategy this marketplace is for"
+            ],
             "type": "pubkey"
           },
           {
             "name": "yield_token_mint",
-            "docs": ["Yield token being traded"],
+            "docs": [
+              "Yield token being traded"
+            ],
             "type": "pubkey"
           },
           {
             "name": "underlying_token_mint",
-            "docs": ["Underlying token for pricing"],
+            "docs": [
+              "Underlying token for pricing"
+            ],
             "type": "pubkey"
           },
           {
             "name": "total_volume",
-            "docs": ["Total trading volume"],
+            "docs": [
+              "Total trading volume"
+            ],
             "type": "u64"
           },
           {
             "name": "total_trades",
-            "docs": ["Total number of trades executed"],
+            "docs": [
+              "Total number of trades executed"
+            ],
             "type": "u64"
           },
           {
@@ -978,22 +1483,30 @@
           },
           {
             "name": "trading_fee_bps",
-            "docs": ["Trading fee in basis points (100 = 1%)"],
+            "docs": [
+              "Trading fee in basis points (100 = 1%)"
+            ],
             "type": "u16"
           },
           {
             "name": "is_active",
-            "docs": ["Whether trading is enabled"],
+            "docs": [
+              "Whether trading is enabled"
+            ],
             "type": "bool"
           },
           {
             "name": "created_at",
-            "docs": ["When the marketplace was created"],
+            "docs": [
+              "When the marketplace was created"
+            ],
             "type": "i64"
           },
           {
             "name": "marketplace_id",
-            "docs": ["Marketplace ID"],
+            "docs": [
+              "Marketplace ID"
+            ],
             "type": "u64"
           }
         ]
@@ -1006,7 +1519,9 @@
         "fields": [
           {
             "name": "count",
-            "docs": ["Current marketplace count for ID generation"],
+            "docs": [
+              "Current marketplace count for ID generation"
+            ],
             "type": "u64"
           }
         ]
@@ -1019,7 +1534,9 @@
         "fields": [
           {
             "name": "count",
-            "docs": ["Current order count for ID generation"],
+            "docs": [
+              "Current order count for ID generation"
+            ],
             "type": "u64"
           }
         ]
@@ -1032,7 +1549,9 @@
         "fields": [
           {
             "name": "admin",
-            "docs": ["Admin who created and manages this strategy"],
+            "docs": [
+              "Admin who created and manages this strategy"
+            ],
             "type": "pubkey"
           },
           {
@@ -1051,37 +1570,51 @@
           },
           {
             "name": "name",
-            "docs": ["Strategy name (e.g., \"Solana Staking Strategy\")"],
+            "docs": [
+              "Strategy name (e.g., \"Solana Staking Strategy\")"
+            ],
             "type": "string"
           },
           {
             "name": "apy",
-            "docs": ["Annual Percentage Yield in basis points (1000 = 10.00%)"],
+            "docs": [
+              "Annual Percentage Yield in basis points (1000 = 10.00%)"
+            ],
             "type": "u64"
           },
           {
             "name": "total_deposits",
-            "docs": ["Total amount deposited in this strategy"],
+            "docs": [
+              "Total amount deposited in this strategy"
+            ],
             "type": "u64"
           },
           {
             "name": "is_active",
-            "docs": ["Whether this strategy is currently accepting deposits"],
+            "docs": [
+              "Whether this strategy is currently accepting deposits"
+            ],
             "type": "bool"
           },
           {
             "name": "created_at",
-            "docs": ["When this strategy was created"],
+            "docs": [
+              "When this strategy was created"
+            ],
             "type": "i64"
           },
           {
             "name": "total_yield_tokens_minted",
-            "docs": ["Total yield tokens minted for this strategy"],
+            "docs": [
+              "Total yield tokens minted for this strategy"
+            ],
             "type": "u64"
           },
           {
             "name": "strategy_id",
-            "docs": ["Strategy ID for easy identification"],
+            "docs": [
+              "Strategy ID for easy identification"
+            ],
             "type": "u64"
           }
         ]
@@ -1094,7 +1627,9 @@
         "fields": [
           {
             "name": "count",
-            "docs": ["Current strategy count for ID generation"],
+            "docs": [
+              "Current strategy count for ID generation"
+            ],
             "type": "u64"
           }
         ]
@@ -1107,22 +1642,30 @@
         "fields": [
           {
             "name": "user",
-            "docs": ["User who placed the order"],
+            "docs": [
+              "User who placed the order"
+            ],
             "type": "pubkey"
           },
           {
             "name": "marketplace",
-            "docs": ["Marketplace this order belongs to"],
+            "docs": [
+              "Marketplace this order belongs to"
+            ],
             "type": "pubkey"
           },
           {
             "name": "order_type",
-            "docs": ["Order type: 0 = Buy, 1 = Sell"],
+            "docs": [
+              "Order type: 0 = Buy, 1 = Sell"
+            ],
             "type": "u8"
           },
           {
             "name": "yield_token_amount",
-            "docs": ["Amount of yield tokens"],
+            "docs": [
+              "Amount of yield tokens"
+            ],
             "type": "u64"
           },
           {
@@ -1135,27 +1678,37 @@
           },
           {
             "name": "total_value",
-            "docs": ["Total value of the order (amount * price)"],
+            "docs": [
+              "Total value of the order (amount * price)"
+            ],
             "type": "u64"
           },
           {
             "name": "filled_amount",
-            "docs": ["Amount already filled"],
+            "docs": [
+              "Amount already filled"
+            ],
             "type": "u64"
           },
           {
             "name": "is_active",
-            "docs": ["Whether the order is still active"],
+            "docs": [
+              "Whether the order is still active"
+            ],
             "type": "bool"
           },
           {
             "name": "created_at",
-            "docs": ["When the order was created"],
+            "docs": [
+              "When the order was created"
+            ],
             "type": "i64"
           },
           {
             "name": "order_id",
-            "docs": ["Order ID for tracking"],
+            "docs": [
+              "Order ID for tracking"
+            ],
             "type": "u64"
           }
         ]
@@ -1168,27 +1721,37 @@
         "fields": [
           {
             "name": "user",
-            "docs": ["The user who owns this position"],
+            "docs": [
+              "The user who owns this position"
+            ],
             "type": "pubkey"
           },
           {
             "name": "strategy",
-            "docs": ["The strategy this position belongs to"],
+            "docs": [
+              "The strategy this position belongs to"
+            ],
             "type": "pubkey"
           },
           {
             "name": "deposited_amount",
-            "docs": ["Principal amount deposited by the user"],
+            "docs": [
+              "Principal amount deposited by the user"
+            ],
             "type": "u64"
           },
           {
             "name": "yield_tokens_minted",
-            "docs": ["Yield tokens minted to this user"],
+            "docs": [
+              "Yield tokens minted to this user"
+            ],
             "type": "u64"
           },
           {
             "name": "deposit_time",
-            "docs": ["When the user made the deposit"],
+            "docs": [
+              "When the user made the deposit"
+            ],
             "type": "i64"
           },
           {
@@ -1200,12 +1763,16 @@
           },
           {
             "name": "total_yield_claimed",
-            "docs": ["Total yield claimed by this user"],
+            "docs": [
+              "Total yield claimed by this user"
+            ],
             "type": "u64"
           },
           {
             "name": "position_id",
-            "docs": ["Position ID for easy tracking"],
+            "docs": [
+              "Position ID for easy tracking"
+            ],
             "type": "u64"
           }
         ]

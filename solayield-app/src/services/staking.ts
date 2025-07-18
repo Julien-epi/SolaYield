@@ -8,6 +8,7 @@ import {
   getAccount,
 } from "@solana/spl-token";
 import * as anchor from "@coral-xyz/anchor";
+import { createTokenMetadata } from "./metaplex-metadata";
 
 export interface StakingPool {
   id: string;
@@ -304,8 +305,6 @@ export const stakingService = {
         wallet.publicKey
       );
 
-
-
       // Vérifier le solde - pour SOL, on vérifie le solde natif
       if (isWrappedSol) {
         // Pour SOL, vérifier le solde natif + frais de transaction + rent
@@ -332,9 +331,50 @@ export const stakingService = {
         }
       }
 
-      // Effectuer le dépôt
+      // --- AJOUT : Vérifier/créer le compte SPL pour le yield token ---
       let txHash;
+      let ataExists = true;
       try {
+        await getAccount(connection, userYieldTokenAccount);
+      } catch (e) {
+        ataExists = false;
+      }
+
+      if (!ataExists) {
+        // Créer le compte ATA + staking dans la même transaction
+        const transaction = new Transaction();
+        transaction.add(
+          createAssociatedTokenAccountInstruction(
+            wallet.publicKey,
+            userYieldTokenAccount,
+            wallet.publicKey,
+            yieldTokenMint
+          )
+        );
+        // Ajoute l'instruction depositToStrategy
+        const ix = await program.methods
+          .depositToStrategy(amountBN, strategyIdBN)
+          .accounts({
+            user: wallet.publicKey,
+            strategy: strategyPda,
+            user_position: userPositionPda,
+            underlyingTokenMint: underlyingTokenMint,
+            userUnderlyingToken: userUnderlyingTokenAccount,
+            strategyVault: strategyVaultPda,
+            yieldTokenMint: yieldTokenMint,
+            userYieldTokenAccount: userYieldTokenAccount,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+          })
+          .instruction();
+        transaction.add(ix);
+        // Envoie la transaction groupée
+        txHash = await wallet.sendTransaction(transaction, connection);
+        await connection.confirmTransaction(txHash, 'confirmed');
+      } else {
+        // ATA existe déjà, on peut faire comme avant
         txHash = await program.methods
           .depositToStrategy(amountBN, strategyIdBN)
           .accounts({
@@ -352,12 +392,24 @@ export const stakingService = {
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,
           })
           .rpc();
-      } catch (rpcError: any) {
-        console.error("Erreur lors du dépôt:", rpcError);
-        if (rpcError.logs) {
-          console.error("Transaction logs:", rpcError.logs);
+      }
+
+      // AJOUT : après le staking réussi, créer la métadonnée Metaplex pour le yield token
+      try {
+        await createTokenMetadata({
+          connection,
+          mint: yieldTokenMint,
+          payer: wallet,
+          name: `yToken ${strategyId}`,
+          symbol: `yTKN${strategyId}`,
+          uri: "", // ou un lien vers une image si tu veux
+        });
+      } catch (e) {
+        const err = e as Error;
+        // Si la métadonnée existe déjà, on ignore l'erreur
+        if (!err.message?.includes("already in use")) {
+          console.error("Erreur création metadata:", err);
         }
-        throw rpcError;
       }
 
       return {
